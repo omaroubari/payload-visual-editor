@@ -10,8 +10,10 @@
     "cssVariables": true,
     "prefix": ""
   },
-  "iconLibrary": "hugeicons",
+  "iconLibrary": "lucide",
   "rtl": false,
+  "menuColor": "default",
+  "menuAccent": "subtle",
   "aliases": {
     "components": "dev/components",
     "utils": "dev/lib/utils",
@@ -19,7 +21,8 @@
     "lib": "dev/lib",
     "hooks": "dev/hooks"
   },
-  "menuColor": "default",
-  "menuAccent": "subtle",
-  "registries": {}
+  "registries": {
+    "@tailark": "https://tailark.com/r/{name}.json",
+    "@motion-primitives": "https://motion-primitives.com/c/{name}.json"
+  }
 }

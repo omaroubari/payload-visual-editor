@@ -66,6 +66,7 @@
     "eslint": "^9.23.0",
     "eslint-config-next": "16.2.3",
     "graphql": "^16.8.1",
+    "lucide-react": "^1.8.0",
     "mongodb-memory-server": "10.1.4",
     "next": "16.2.3",
     "open": "^10.1.0",

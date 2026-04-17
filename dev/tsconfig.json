@@ -16,20 +16,13 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@payload-config": [
-        "./payload.config.ts"
-      ],
-      "payload-visual-editor": [
-        "../src/index.ts"
-      ],
-      "payload-visual-editor/client": [
-        "../src/exports/client.ts"
-      ],
-      "payload-visual-editor/rsc": [
-        "../src/exports/rsc.ts"
-      ]
+      "dev/*": ["./*"],
+      "@payload-config": ["./payload.config.ts"],
+      "payload-visual-editor": ["../src/index.ts"],
+      "payload-visual-editor/client": ["../src/exports/client.ts"],
+      "payload-visual-editor/rsc": ["../src/exports/rsc.ts"]
     },
     "noEmit": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": false
   }
 }
