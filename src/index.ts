@@ -72,9 +72,7 @@ export const payloadVisualEditor =
     config.admin.components.beforeDashboard.push(
       `payload-visual-editor/client#BeforeDashboardClient`,
     )
-    config.admin.components.beforeDashboard.push(
-      `payload-visual-editor/rsc#BeforeDashboardServer`,
-    )
+    config.admin.components.beforeDashboard.push(`payload-visual-editor/rsc#BeforeDashboardServer`)
 
     config.endpoints.push({
       handler: customEndpointHandler,
