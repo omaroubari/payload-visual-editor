@@ -6,6 +6,7 @@ import { payloadVisualEditor } from 'payload-visual-editor'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { Pages } from './collections/Pages.js'
 import { testEmailAdapter } from './helpers/testEmailAdapter.js'
 import { seed } from './seed.js'
 
@@ -23,6 +24,7 @@ export default buildConfig({
     },
   },
   collections: [
+    Pages,
     {
       slug: 'posts',
       fields: [],
@@ -42,16 +44,17 @@ export default buildConfig({
   }) as unknown as Config['db'],
   editor: lexicalEditor() as unknown as Config['editor'],
   email: testEmailAdapter,
+  onInit: async (payload) => {
+    await seed(payload)
+  },
   plugins: [
     payloadVisualEditor({
       collections: {
+        pages: true,
         posts: true,
       },
     }),
   ],
-  onInit: async (payload) => {
-    await seed(payload)
-  },
   secret: process.env.PAYLOAD_SECRET || 'test-secret_key',
   sharp,
   typescript: {
