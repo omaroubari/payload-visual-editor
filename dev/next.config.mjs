@@ -18,4 +18,7 @@ const nextConfig = {
   serverExternalPackages: ['mongodb-memory-server'],
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+/** @type {import('next').NextConfig} */
+const config = withPayload(nextConfig, { devBundleServerPackages: false })
+
+export default config
