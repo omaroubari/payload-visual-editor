@@ -15,7 +15,10 @@
   ],
   "compilerOptions": {
     "baseUrl": "./",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
+      "@/*": ["./*"],
       "dev/*": ["./*"],
       "@payload-config": ["./payload.config.ts"],
       "payload-visual-editor": ["../src/index.ts"],

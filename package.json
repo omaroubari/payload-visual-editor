@@ -45,6 +45,7 @@
     "test:int": "vitest"
   },
   "devDependencies": {
+    "@base-ui/react": "^1.4.0",
     "@eslint/eslintrc": "^3.2.0",
     "@next/font": "^14.2.15",
     "@payloadcms/db-mongodb": "3.82.1",
@@ -56,12 +57,14 @@
     "@payloadcms/richtext-lexical": "3.82.1",
     "@payloadcms/ui": "3.82.1",
     "@playwright/test": "1.58.2",
+    "@radix-ui/react-slot": "^1.2.4",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "22.19.9",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "class-variance-authority": "^0.7.1",
     "copyfiles": "2.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^9.23.0",
