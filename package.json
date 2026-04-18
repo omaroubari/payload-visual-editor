@@ -52,7 +52,7 @@
     "@payloadcms/db-sqlite": "3.82.1",
     "@payloadcms/eslint-config": "3.28.0",
     "@payloadcms/next": "3.82.1",
-    "@payloadcms/plugin-seo": "^3.83.0",
+    "@payloadcms/plugin-seo": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
     "@payloadcms/ui": "3.82.1",
     "@playwright/test": "1.58.2",
