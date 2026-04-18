@@ -15,8 +15,11 @@ import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 // import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
+import { FAQs } from '../../blocks/FAQs/config'
+import { Features } from '../../blocks/Features/config'
 // import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { Testimonials } from '../../blocks/Testimonials/config'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
@@ -75,7 +78,7 @@ export const Pages: CollectionConfig<'pages'> = {
               admin: {
                 initCollapsed: true,
               },
-              blocks: [CallToAction, Content, MediaBlock],
+              blocks: [Content, Features, Testimonials, FAQs, CallToAction, MediaBlock],
               required: true,
             },
           ],

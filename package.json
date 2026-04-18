@@ -47,7 +47,6 @@
   "devDependencies": {
     "@base-ui/react": "^1.4.0",
     "@eslint/eslintrc": "^3.2.0",
-    "@next/font": "^14.2.15",
     "@payloadcms/db-mongodb": "3.82.1",
     "@payloadcms/db-postgres": "3.82.1",
     "@payloadcms/db-sqlite": "3.82.1",

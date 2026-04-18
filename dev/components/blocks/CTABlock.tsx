@@ -1,31 +1,44 @@
-type CTABlockProps = {
+import { CMSButtonLink, type CMSLinkData } from './CMSButtonLink.js'
+
+export type CTABlockProps = {
+  description?: string | null
   heading?: string | null
-  text?: string | null
-  buttonLabel?: string | null
-  buttonUrl?: string | null
+  links?: Array<{
+    id?: string | null
+    link?: CMSLinkData | null
+  }> | null
 }
 
-export const CTABlock = ({ heading, text, buttonLabel, buttonUrl }: CTABlockProps) => {
-  if (!heading && !text && !buttonLabel) {
+export const CTABlock = ({ description, heading, links }: CTABlockProps) => {
+  if (!heading && !description && !links?.length) {
     return null
   }
 
   return (
-    <section className="rounded-xl border border-border bg-secondary/40 p-6 shadow-sm sm:p-8">
-      {heading ? <h2 className="font-heading text-2xl font-semibold tracking-tight">{heading}</h2> : null}
-      {text ? <p className="mt-3 text-base leading-7 text-muted-foreground">{text}</p> : null}
-      {buttonLabel && buttonUrl ? (
-        <p className="mt-5">
-          <a
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            href={buttonUrl}
-          >
-            {buttonLabel}
-          </a>
-        </p>
-      ) : buttonLabel ? (
-        <p className="mt-5 text-sm font-medium text-foreground">{buttonLabel}</p>
-      ) : null}
+    <section>
+      <div className="py-12">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="space-y-6 text-center">
+            {heading ? (
+              <h2 className="text-foreground text-balance text-3xl font-semibold lg:text-4xl">
+                {heading}
+              </h2>
+            ) : null}
+
+            {description ? (
+              <p className="text-muted-foreground mx-auto max-w-2xl text-lg">{description}</p>
+            ) : null}
+
+            {links?.length ? (
+              <div className="flex flex-wrap justify-center gap-3">
+                {links.map(({ link }, index) => (
+                  <CMSButtonLink key={index} link={link} size="lg" />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
     </section>
   )
 }

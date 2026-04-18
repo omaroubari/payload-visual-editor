@@ -1,17 +1,12 @@
 import type { Block } from 'payload'
 
-export const Content: Block = {
-  slug: 'content',
-  interfaceName: 'ContentSectionBlock',
+export const Testimonials: Block = {
+  slug: 'testimonials',
+  interfaceName: 'TestimonialsBlock',
   fields: [
-    {
-      name: 'eyebrow',
-      type: 'text',
-    },
     {
       name: 'heading',
       type: 'text',
-      required: true,
     },
     {
       name: 'description',
@@ -25,33 +20,31 @@ export const Content: Block = {
       },
       fields: [
         {
-          name: 'title',
+          name: 'name',
           type: 'text',
           required: true,
         },
         {
-          name: 'description',
+          name: 'role',
+          type: 'text',
+        },
+        {
+          name: 'content',
           type: 'textarea',
           required: true,
         },
         {
-          name: 'illustration',
+          name: 'stars',
           type: 'select',
-          defaultValue: 'code',
-          options: [
-            {
-              label: 'Code Illustration',
-              value: 'code',
-            },
-            {
-              label: 'Schedule Illustration',
-              value: 'schedule',
-            },
-          ],
+          defaultValue: '5',
+          options: ['1', '2', '3', '4', '5'],
           required: true,
         },
+        {
+          name: 'avatarUrl',
+          type: 'text',
+        },
       ],
-      maxRows: 6,
       minRows: 1,
       required: true,
     },

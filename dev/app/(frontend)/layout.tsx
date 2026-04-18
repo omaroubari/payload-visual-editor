@@ -6,6 +6,7 @@ import './styles.css'
 
 const geist = Geist({
   subsets: ['latin'],
+  variable: '--font-sans',
 })
 
 type Props = {

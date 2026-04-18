@@ -1,28 +1,39 @@
 import { CTABlock } from './CTABlock.js'
 import { ContentBlock } from './ContentBlock.js'
-import { HeroBlock } from './HeroBlock.js'
+import { FAQsBlock } from './FAQsBlock.js'
+import { FeaturesBlock } from './FeaturesBlock.js'
 import { MediaBlock } from './MediaBlock.js'
+import { TestimonialsBlock } from './TestimonialsBlock.js'
+import type { CMSLinkData } from './CMSButtonLink.js'
 
-type Block = {
+export type PageBlock = {
   id?: string
   blockType?: string
-  type?: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | null
+  description?: string | null
+  eyebrow?: string | null
+  features?: Array<{
+    description?: string | null
+    icon?: 'calendarCheck' | 'sparkles' | 'target' | null
+    illustration?: 'assistant' | 'codeReview' | 'meeting' | null
+    title?: string | null
+  }> | null
   heading?: string | null
-  subheading?: string | null
-  content?: string | null
-  text?: string | null
-  buttonLabel?: string | null
-  buttonUrl?: string | null
-  primaryButtonLabel?: string | null
-  primaryButtonUrl?: string | null
-  secondaryButtonLabel?: string | null
-  secondaryButtonUrl?: string | null
-  image?:
-    | string
-    | {
-        url?: string | null
-      }
-    | null
+  items?: Array<{
+    answer?: string | null
+    avatarUrl?: string | null
+    content?: string | null
+    description?: string | null
+    illustration?: 'code' | 'schedule' | null
+    name?: string | null
+    question?: string | null
+    role?: string | null
+    stars?: '1' | '2' | '3' | '4' | '5' | null
+    title?: string | null
+  }> | null
+  links?: Array<{
+    id?: string | null
+    link?: CMSLinkData | null
+  }> | null
   media?:
     | string
     | {
@@ -30,10 +41,12 @@ type Block = {
       }
     | null
   caption?: string | null
+  supportLink?: CMSLinkData | null
+  supportText?: string | null
 }
 
 type RenderBlocksProps = {
-  blocks?: Block[] | null
+  blocks?: PageBlock[] | null
 }
 
 export const RenderBlocks = ({ blocks }: RenderBlocksProps) => {
@@ -42,51 +55,81 @@ export const RenderBlocks = ({ blocks }: RenderBlocksProps) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 py-8">
+    <div>
       {blocks.map((block, index) => {
-        if (block.blockType === 'hero') {
-          return (
-            <HeroBlock
-              key={block.id ?? index}
-              heading={block.heading}
-              media={block.media}
-              primaryButtonLabel={block.primaryButtonLabel}
-              primaryButtonUrl={block.primaryButtonUrl}
-              secondaryButtonLabel={block.secondaryButtonLabel}
-              secondaryButtonUrl={block.secondaryButtonUrl}
-              subheading={block.subheading}
-              type={block.type}
-            />
-          )
-        }
-
         if (block.blockType === 'content') {
           return (
-            <div key={block.id ?? index} className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
-              <ContentBlock content={block.content} heading={block.heading} />
-            </div>
+            <ContentBlock
+              description={block.description}
+              eyebrow={block.eyebrow}
+              heading={block.heading}
+              items={block.items?.map((item) => ({
+                description: item.description,
+                illustration: item.illustration,
+                title: item.title,
+              }))}
+              key={block.id ?? index}
+            />
           )
         }
 
         if (block.blockType === 'cta') {
           return (
-            <div key={block.id ?? index} className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
-              <CTABlock
-                buttonLabel={block.buttonLabel}
-                buttonUrl={block.buttonUrl}
-                heading={block.heading}
-                text={block.text}
-              />
-            </div>
+            <CTABlock
+              description={block.description}
+              heading={block.heading}
+              key={block.id ?? index}
+              links={block.links}
+            />
           )
         }
 
-        if (block.blockType === 'media') {
+        if (block.blockType === 'features') {
           return (
-            <div key={block.id ?? index} className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
-              <MediaBlock caption={block.caption} image={block.image} />
-            </div>
+            <FeaturesBlock
+              description={block.description}
+              features={block.features}
+              heading={block.heading}
+              key={block.id ?? index}
+            />
           )
+        }
+
+        if (block.blockType === 'faqs') {
+          return (
+            <FAQsBlock
+              description={block.description}
+              heading={block.heading}
+              items={block.items?.map((item) => ({
+                answer: item.answer,
+                question: item.question,
+              }))}
+              key={block.id ?? index}
+              supportLink={block.supportLink}
+              supportText={block.supportText}
+            />
+          )
+        }
+
+        if (block.blockType === 'testimonials') {
+          return (
+            <TestimonialsBlock
+              description={block.description}
+              heading={block.heading}
+              items={block.items?.map((item) => ({
+                avatarUrl: item.avatarUrl,
+                content: item.content,
+                name: item.name,
+                role: item.role,
+                stars: item.stars,
+              }))}
+              key={block.id ?? index}
+            />
+          )
+        }
+
+        if (block.blockType === 'mediaBlock') {
+          return <MediaBlock caption={block.caption} key={block.id ?? index} media={block.media} />
         }
 
         return null

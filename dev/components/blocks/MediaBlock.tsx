@@ -6,35 +6,40 @@ type MediaValue =
   | null
 
 type MediaBlockProps = {
-  image?: MediaValue
   caption?: string | null
+  media?: MediaValue
 }
 
-const getImageURL = (image?: MediaValue) => {
-  if (!image || typeof image === 'string') {
+const getImageURL = (media?: MediaValue) => {
+  if (!media || typeof media === 'string') {
     return null
   }
 
-  return image.url ?? null
+  return media.url ?? null
 }
 
-export const MediaBlock = ({ image, caption }: MediaBlockProps) => {
-  const imageURL = getImageURL(image)
+export const MediaBlock = ({ caption, media }: MediaBlockProps) => {
+  const imageURL = getImageURL(media)
 
   if (!imageURL && !caption) {
     return null
   }
 
   return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
-      {imageURL ? (
-        <img className="h-auto w-full rounded-lg object-cover" src={imageURL} alt={caption ?? 'Media'} />
-      ) : (
-        <p className="rounded-lg border border-dashed border-border bg-muted px-4 py-12 text-center text-sm text-muted-foreground">
-          Image unavailable
-        </p>
-      )}
-      {caption ? <p className="mt-3 text-sm leading-6 text-muted-foreground">{caption}</p> : null}
+    <section className="py-12">
+      <div className="mx-auto w-full max-w-5xl px-6">
+        <div className="bg-background rounded-(--radius) overflow-hidden border border-transparent shadow-lg shadow-black/10 ring-1 ring-black/10">
+          {imageURL ? (
+            <img className="h-auto w-full object-cover" src={imageURL} alt={caption ?? 'Media'} />
+          ) : (
+            <div className="bg-muted/60 flex aspect-[16/10] items-center justify-center px-6 text-center">
+              <p className="text-muted-foreground text-sm">Image unavailable</p>
+            </div>
+          )}
+        </div>
+
+        {caption ? <p className="text-muted-foreground mt-4 text-sm">{caption}</p> : null}
+      </div>
     </section>
   )
 }

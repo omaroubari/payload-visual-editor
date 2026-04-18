@@ -1,12 +1,5 @@
 import type { Field } from 'payload'
 
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-
 import { linkGroup } from '@/fields/linkGroup'
 
 export const hero: Field = {
@@ -16,7 +9,7 @@ export const hero: Field = {
     {
       name: 'type',
       type: 'select',
-      defaultValue: 'lowImpact',
+      defaultValue: 'highImpact',
       label: 'Type',
       options: [
         {
@@ -27,34 +20,37 @@ export const hero: Field = {
           label: 'High Impact',
           value: 'highImpact',
         },
-        {
-          label: 'Medium Impact',
-          value: 'mediumImpact',
-        },
-        {
-          label: 'Low Impact',
-          value: 'lowImpact',
-        },
       ],
       required: true,
     },
     {
-      name: 'richText',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            FixedToolbarFeature(),
-            InlineToolbarFeature(),
-          ]
-        },
-      }),
-      label: false,
+      name: 'announcement',
+      type: 'text',
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'highImpact',
+      },
+    },
+    {
+      name: 'heading',
+      type: 'text',
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'highImpact',
+      },
+      required: true,
+    },
+    {
+      name: 'subheading',
+      type: 'textarea',
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'highImpact',
+      },
     },
     linkGroup({
+      appearances: ['default', 'outline'],
       overrides: {
+        admin: {
+          condition: (_, siblingData) => siblingData?.type === 'highImpact',
+        },
         maxRows: 2,
       },
     }),
@@ -62,10 +58,9 @@ export const hero: Field = {
       name: 'media',
       type: 'upload',
       admin: {
-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
+        condition: (_, siblingData) => siblingData?.type === 'highImpact',
       },
       relationTo: 'media',
-      required: true,
     },
   ],
   label: false,
