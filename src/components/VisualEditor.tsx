@@ -5,11 +5,11 @@ import { useEffect, useMemo, useState } from 'react'
 import type { VisualEditorPatch } from '../documentPatches.js'
 import type { VisualEditorDocument } from '../runtime.js'
 
-type SimpleElement = HTMLElement & {
-  dataset: DOMStringMap & {
+type SimpleElement = {
+  dataset: {
     payloadPath?: string
-  }
-}
+  } & DOMStringMap
+} & HTMLElement
 
 type Props = {
   document: VisualEditorDocument
@@ -70,8 +70,9 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
   const [patches, setPatches] = useState<Record<string, string>>({})
   const [draftValue, setDraftValue] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-  const [status, setStatus] = useState<string | null>(null)
+  const [isReady, setIsReady] = useState(false)
+  const [saveError, setSaveError] = useState<null | string>(null)
+  const [status, setStatus] = useState<null | string>(null)
 
   const patchList = useMemo<VisualEditorPatch[]>(
     () =>
@@ -120,9 +121,11 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
     }
 
     document.addEventListener('click', handleClick)
+    setIsReady(true)
 
     return () => {
       document.removeEventListener('click', handleClick)
+      setIsReady(false)
     }
   }, [editablePaths, patches])
 
@@ -138,9 +141,9 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
     try {
       const response = await fetch(`${visualDocument.apiPath ?? '/api'}/payload-visual-editor`, {
         body: JSON.stringify({
+          id: visualDocument.id,
           action: 'save',
           collection: visualDocument.collection,
-          id: visualDocument.id,
           patches: patchList,
         }),
         credentials: 'same-origin',
@@ -165,63 +168,68 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
   }
 
   if (!activeField) {
-    return null
+    return isReady ? (
+      <span aria-hidden="true" data-payload-visual-editor-ready="true" hidden />
+    ) : null
   }
 
   const top = Math.min(activeField.rect.bottom + 12, window.innerHeight - 180)
   const left = Math.min(activeField.rect.left, window.innerWidth - 320)
 
   return (
-    <div
-      aria-label="Visual editor popover"
-      className="fixed z-[1000] w-80 rounded-xl border border-black/10 bg-white p-4 shadow-2xl"
-      style={{
-        left,
-        top,
-      }}
-    >
-      <div className="mb-2 text-sm font-semibold text-slate-900">{activeField.path}</div>
-      <label className="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
-        Title
-      </label>
-      <input
-        aria-label="Edit value"
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none"
-        onChange={(event) => {
-          const nextValue = event.target.value
-
-          setDraftValue(nextValue)
-          setPatches((current) => ({
-            ...current,
-            [activeField.path]: nextValue,
-          }))
-          updateElements(activeField.path, nextValue, editablePaths)
-          setStatus(null)
+    <>
+      {isReady ? <span aria-hidden="true" data-payload-visual-editor-ready="true" hidden /> : null}
+      <div
+        aria-label="Visual editor popover"
+        className="fixed z-[1000] w-80 rounded-xl border border-black/10 bg-white p-4 shadow-2xl"
+        style={{
+          left,
+          top,
         }}
-        value={draftValue}
-      />
-      {saveError ? <p className="mt-2 text-sm text-red-600">{saveError}</p> : null}
-      {status ? <p className="mt-2 text-sm text-emerald-700">{status}</p> : null}
-      <div className="mt-3 flex items-center justify-end gap-2">
-        <button
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
-          onClick={() => {
-            setActiveField(null)
-            setSaveError(null)
+      >
+        <div className="mb-2 text-sm font-semibold text-slate-900">{activeField.path}</div>
+        <label className="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+          Title
+        </label>
+        <input
+          aria-label="Edit value"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none"
+          onChange={(event) => {
+            const nextValue = event.target.value
+
+            setDraftValue(nextValue)
+            setPatches((current) => ({
+              ...current,
+              [activeField.path]: nextValue,
+            }))
+            updateElements(activeField.path, nextValue, editablePaths)
+            setStatus(null)
           }}
-          type="button"
-        >
-          Close
-        </button>
-        <button
-          className="rounded-lg bg-slate-950 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={isSaving || patchList.length === 0}
-          onClick={() => void savePatches()}
-          type="button"
-        >
-          {isSaving ? 'Saving…' : 'Save'}
-        </button>
+          value={draftValue}
+        />
+        {saveError ? <p className="mt-2 text-sm text-red-600">{saveError}</p> : null}
+        {status ? <p className="mt-2 text-sm text-emerald-700">{status}</p> : null}
+        <div className="mt-3 flex items-center justify-end gap-2">
+          <button
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
+            onClick={() => {
+              setActiveField(null)
+              setSaveError(null)
+            }}
+            type="button"
+          >
+            Close
+          </button>
+          <button
+            className="rounded-lg bg-slate-950 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isSaving || patchList.length === 0}
+            onClick={() => void savePatches()}
+            type="button"
+          >
+            {isSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
