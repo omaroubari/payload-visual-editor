@@ -1,7 +1,8 @@
+import type { Page } from '@/payload-types'
+
 import { HighImpactHero } from '@/heros/HighImpact'
 import React from 'react'
-
-import type { HeroData } from './types'
+export type HeroData = Page['hero']
 
 const heroes = {
   highImpact: HighImpactHero,

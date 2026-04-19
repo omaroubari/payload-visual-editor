@@ -1,16 +1,7 @@
-type MediaValue =
-  | string
-  | {
-      url?: string | null
-    }
-  | null
+import type { MediaSectionBlock as MediaSectionBlockType } from "@/payload-types"
 
-type MediaBlockProps = {
-  caption?: string | null
-  media?: MediaValue
-}
 
-const getImageURL = (media?: MediaValue) => {
+const getImageURL = (media?: MediaSectionBlockType['media']) => {
   if (!media || typeof media === 'string') {
     return null
   }
@@ -18,7 +9,7 @@ const getImageURL = (media?: MediaValue) => {
   return media.url ?? null
 }
 
-export const MediaBlock = ({ caption, media }: MediaBlockProps) => {
+export const MediaBlock = ({ caption, media }: MediaSectionBlockType) => {
   const imageURL = getImageURL(media)
 
   if (!imageURL && !caption) {
@@ -30,7 +21,7 @@ export const MediaBlock = ({ caption, media }: MediaBlockProps) => {
       <div className="mx-auto w-full max-w-5xl px-6">
         <div className="bg-background rounded-(--radius) overflow-hidden border border-transparent shadow-lg shadow-black/10 ring-1 ring-black/10">
           {imageURL ? (
-            <img className="h-auto w-full object-cover" src={imageURL} alt={caption ?? 'Media'} />
+            <img alt={caption ?? 'Media'} className="h-auto w-full object-cover" src={imageURL} />
           ) : (
             <div className="bg-muted/60 flex aspect-[16/10] items-center justify-center px-6 text-center">
               <p className="text-muted-foreground text-sm">Image unavailable</p>

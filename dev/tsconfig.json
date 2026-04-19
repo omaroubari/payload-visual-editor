@@ -11,7 +11,7 @@
     "../src/**/*.ts",
     "../src/**/*.tsx",
     "next.config.mjs",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
   ],
   "compilerOptions": {
     "baseUrl": "./",
@@ -23,9 +23,9 @@
       "@payload-config": ["./payload.config.ts"],
       "payload-visual-editor": ["../src/index.ts"],
       "payload-visual-editor/client": ["../src/exports/client.ts"],
-      "payload-visual-editor/rsc": ["../src/exports/rsc.ts"]
+      "payload-visual-editor/rsc": ["../src/exports/rsc.ts"],
     },
     "noEmit": true,
-    "emitDeclarationOnly": false
-  }
+    "emitDeclarationOnly": false,
+  },
 }

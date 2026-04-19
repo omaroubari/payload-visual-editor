@@ -1,15 +1,10 @@
-import { CMSButtonLink, type CMSLinkData } from './CMSButtonLink.js'
+import type { CallToActionSectionBlock } from '@/payload-types.js'
 
-export type CTABlockProps = {
-  description?: string | null
-  heading?: string | null
-  links?: Array<{
-    id?: string | null
-    link?: CMSLinkData | null
-  }> | null
-}
+import { CMSButtonLink } from './CMSButtonLink.js'
 
-export const CTABlock = ({ description, heading, links }: CTABlockProps) => {
+
+
+export const CTABlock = ({ description, heading, links }: CallToActionSectionBlock) => {
   if (!heading && !description && !links?.length) {
     return null
   }

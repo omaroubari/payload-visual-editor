@@ -1,20 +1,10 @@
+import type { ContentSectionBlock } from '@/payload-types'
+
 import { Button } from 'dev/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from 'dev/components/ui/toggle-group'
 import { cn } from 'dev/lib/utils'
 import { Bold, Calendar1, Ellipsis, Italic, Strikethrough, Underline } from 'lucide-react'
 
-type ContentItem = {
-  description?: string | null
-  illustration?: 'code' | 'schedule' | null
-  title?: string | null
-}
-
-export type ContentBlockProps = {
-  description?: string | null
-  eyebrow?: string | null
-  heading?: string | null
-  items?: ContentItem[] | null
-}
 
 const ScheduleIllustration = ({ className }: { className?: string }) => {
   return (
@@ -77,7 +67,7 @@ const CodeIllustration = ({ className }: { className?: string }) => {
   )
 }
 
-export const ContentBlock = ({ description, eyebrow, heading, items }: ContentBlockProps) => {
+export const ContentBlock = ({ description, eyebrow, heading, items }: ContentSectionBlock) => {
   if (!heading || !items?.length) {
     return null
   }

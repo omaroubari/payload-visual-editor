@@ -1,3 +1,5 @@
+import type { FeaturesBlock as FeaturesBlockType  } from '@/payload-types'
+
 import { Button } from 'dev/components/ui/button'
 import { Card } from 'dev/components/ui/card'
 import { cn } from 'dev/lib/utils'
@@ -16,19 +18,6 @@ const iconMap = {
   calendarCheck: CalendarCheck,
   sparkles: Sparkles,
   target: Target,
-}
-
-type FeatureItem = {
-  description?: string | null
-  icon?: keyof typeof iconMap | null
-  illustration?: 'assistant' | 'codeReview' | 'meeting' | null
-  title?: string | null
-}
-
-export type FeaturesBlockProps = {
-  description?: string | null
-  features?: FeatureItem[] | null
-  heading?: string | null
 }
 
 const AVATARS = [
@@ -145,13 +134,13 @@ const AssistantIllustration = () => {
   )
 }
 
-const renderIllustration = (illustration?: FeatureItem['illustration']) => {
-  if (illustration === 'meeting') return <MeetingIllustration />
-  if (illustration === 'codeReview') return <CodeReviewIllustration />
+const renderIllustration = (illustration?: FeaturesBlockType['features'][0]['illustration']) => {
+  if (illustration === 'meeting') {return <MeetingIllustration />}
+  if (illustration === 'codeReview') {return <CodeReviewIllustration />}
   return <AssistantIllustration />
 }
 
-export const FeaturesBlock = ({ description, features, heading }: FeaturesBlockProps) => {
+export const FeaturesBlock = ({ description, features, heading }: FeaturesBlockType) => {
   if (!heading || !features?.length) {
     return null
   }

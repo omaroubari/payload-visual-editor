@@ -1,12 +1,11 @@
 'use client'
 
+import { CMSButtonLink } from 'dev/components/blocks/CMSButtonLink.js'
+import { HeroHeader } from 'dev/components/header'
 import { Sparkle } from 'lucide-react'
 import React from 'react'
 
-import { CMSButtonLink } from 'dev/components/blocks/CMSButtonLink.js'
-import { HeroHeader } from 'dev/components/header'
-
-import type { HeroData } from '../types'
+import type { HeroData } from '../RenderHero'
 
 const getImageURL = (media?: HeroData['media']) => {
   if (!media || typeof media === 'string') {

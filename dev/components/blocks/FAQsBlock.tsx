@@ -1,3 +1,5 @@
+import type { FAQsBlock as FAQsBlockType } from '@/payload-types.js'
+
 import {
   Accordion,
   AccordionContent,
@@ -5,20 +7,7 @@ import {
   AccordionTrigger,
 } from 'dev/components/ui/accordion'
 
-import { CMSInlineLink, type CMSLinkData } from './CMSButtonLink.js'
-
-type FAQItem = {
-  answer?: string | null
-  question?: string | null
-}
-
-export type FAQsBlockProps = {
-  description?: string | null
-  heading?: string | null
-  items?: FAQItem[] | null
-  supportLink?: CMSLinkData | null
-  supportText?: string | null
-}
+import { CMSButtonLink } from './CMSButtonLink.js'
 
 export const FAQsBlock = ({
   description,
@@ -26,7 +15,7 @@ export const FAQsBlock = ({
   items,
   supportLink,
   supportText,
-}: FAQsBlockProps) => {
+}: FAQsBlockType) => {
   if (!heading || !items?.length) {
     return null
   }
@@ -44,7 +33,7 @@ export const FAQsBlock = ({
         <div className="mt-12">
           <Accordion className="bg-card ring-foreground/5 rounded-(--radius) w-full border border-transparent px-8 py-3 shadow ring-1">
             {items.map((item, index) => {
-              if (!item.question) return null
+              if (!item.question) {return null}
 
               return (
                 <AccordionItem
@@ -67,9 +56,10 @@ export const FAQsBlock = ({
             <p className="text-muted-foreground mt-6">
               {supportText}
               {supportText && supportLink ? ' ' : null}
-              <CMSInlineLink
+              <CMSButtonLink
+                {...supportLink}
+                appearance='inline'
                 className="text-primary font-medium hover:underline"
-                link={supportLink}
               />
             </p>
           ) : null}
