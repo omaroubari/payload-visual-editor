@@ -45,6 +45,7 @@
     "test:int": "vitest"
   },
   "devDependencies": {
+    "@ai-hero/sandcastle": "^0.4.8",
     "@base-ui/react": "^1.4.0",
     "@eslint/eslintrc": "^3.2.0",
     "@payloadcms/db-mongodb": "3.82.1",
