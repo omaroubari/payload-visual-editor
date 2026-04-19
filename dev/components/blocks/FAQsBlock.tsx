@@ -1,13 +1,12 @@
 import type { FAQsBlock as FAQsBlockType } from '@/payload-types.js'
 
+import { CMSLink } from '@/components/CMSLink'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from 'dev/components/ui/accordion'
-
-import { CMSButtonLink } from './CMSButtonLink.js'
 
 export const FAQsBlock = ({
   description,
@@ -56,7 +55,7 @@ export const FAQsBlock = ({
             <p className="text-muted-foreground mt-6">
               {supportText}
               {supportText && supportLink ? ' ' : null}
-              <CMSButtonLink
+              <CMSLink
                 {...supportLink}
                 appearance='inline'
                 className="text-primary font-medium hover:underline"

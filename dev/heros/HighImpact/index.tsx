@@ -1,6 +1,7 @@
 'use client'
 
-import { CMSButtonLink } from 'dev/components/blocks/CMSButtonLink.js'
+
+import { CMSLink } from '@/components/CMSLink'
 import { HeroHeader } from 'dev/components/header'
 import { Sparkle } from 'lucide-react'
 import React from 'react'
@@ -16,11 +17,12 @@ const getImageURL = (media?: HeroData['media']) => {
 }
 
 export const HighImpactHero: React.FC<HeroData> = ({
+  _sourceMap,
   announcement,
   heading,
   links,
   media,
-  subheading,
+  subheading
 }) => {
   if (!heading) {
     return null
@@ -62,7 +64,7 @@ export const HighImpactHero: React.FC<HeroData> = ({
               {links?.length ? (
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   {links.map(({ link }, index) => (
-                    <CMSButtonLink key={index} link={link} size="lg" />
+                    <CMSLink key={index} {...link} size="lg" />
                   ))}
                 </div>
               ) : null}

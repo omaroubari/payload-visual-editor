@@ -1,6 +1,6 @@
 import type { CallToActionSectionBlock } from '@/payload-types.js'
 
-import { CMSButtonLink } from './CMSButtonLink.js'
+import { CMSLink } from '@/components/CMSLink'
 
 
 
@@ -27,7 +27,7 @@ export const CTABlock = ({ description, heading, links }: CallToActionSectionBlo
             {links?.length ? (
               <div className="flex flex-wrap justify-center gap-3">
                 {links.map(({ link }, index) => (
-                  <CMSButtonLink key={index} link={link} size="lg" />
+                  <CMSLink key={index} {...link} size="lg" />
                 ))}
               </div>
             ) : null}

@@ -20,7 +20,7 @@ type CMSLinkType = {
   url?: null | string
 }
 
-export const CMSButtonLink = (props: CMSLinkType) => {
+export const CMSLink = (props: CMSLinkType) => {
   const {
     type,
     appearance = 'inline',
