@@ -29,9 +29,14 @@ import { execFileSync } from 'node:child_process'
 const MAX_ITERATIONS = 10
 
 // Hooks run inside the sandbox before the agent starts each iteration.
-// npm install ensures the sandbox always has fresh dependencies.
+// With the pnpm store mounted into the sandbox, this relinks dependencies
+// without redownloading packages each time.
 const hooks = {
-  onSandboxReady: [{ command: 'pnpm install' }],
+  onSandboxReady: [
+    {
+      command: 'npm install',
+    },
+  ],
 }
 
 // Copy node_modules from the host into the worktree before each sandbox
@@ -45,10 +50,21 @@ const hostPnpmStorePath = execFileSync('pnpm', ['store', 'path'], {
 
 const createSandbox = () =>
   docker({
+    env: {
+      // Sandcastle configures git safe.directory before hooks run. Point the
+      // global git config at a writable sandbox-local file to avoid writing to
+      // /home/agent/.gitconfig, which can be permission-restricted.
+      GIT_CONFIG_GLOBAL: '/tmp/.gitconfig',
+    },
     mounts: [
       {
         hostPath: hostPnpmStorePath,
-        sandboxPath: '/pnpm/store/v10',
+        sandboxPath: '/home/agent/.pnpm-store/v10',
+      },
+      { hostPath: '~/.npm', sandboxPath: '/home/agent/.npm', readonly: true },
+      {
+        hostPath: '~/.codex',
+        sandboxPath: '/home/agent/.codex',
       },
     ],
   })
@@ -86,9 +102,20 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   if (!planMatch) {
     throw new Error('Planning agent did not produce a <plan> tag.\n\n' + plan.stdout)
   }
+  // Some model outputs escape the payload (for example: \n{\"issues\":[]}\n),
+  // so we try raw parsing first, then decode escaped content as a fallback.
+  const parsePlanPayload = (payload: string) => {
+    const trimmed = payload.trim()
+    try {
+      return JSON.parse(trimmed)
+    } catch {
+      const unescaped = trimmed.replace(/\\n/g, '\n').replace(/\\"/g, '"').trim()
+      return JSON.parse(unescaped)
+    }
+  }
 
   // The plan JSON contains an array of issues, each with id, title, branch.
-  const { issues } = JSON.parse(planMatch[1]!) as {
+  const { issues } = parsePlanPayload(planMatch[1]!) as {
     issues: { id: string; title: string; branch: string }[]
   }
 

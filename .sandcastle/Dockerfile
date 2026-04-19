@@ -30,6 +30,9 @@ RUN pnpm add -g @openai/codex
 
 USER agent
 
+# Warm Corepack's pnpm cache for the runtime user to avoid first-run prompts.
+RUN corepack prepare pnpm@10.33.0 --activate
+
 WORKDIR /home/agent
 
 # In worktree sandbox mode, Sandcastle bind-mounts the git worktree at /home/agent/workspace
