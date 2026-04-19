@@ -1,6 +1,6 @@
 import type { CollectionAfterReadHook, CollectionSlug, Config, FieldHook } from 'payload'
 
-import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
+import { visualEditorMutationHandler } from './endpoints/visualEditorMutationHandler.js'
 
 type Value = { [key: string]: Value } | null | string | undefined | Value[]
 
@@ -122,9 +122,9 @@ const payloadVisualEditor =
     // config.admin.components.beforeDashboard.push(`payload-visual-editor/rsc#BeforeDashboardServer`)
 
     config.endpoints.push({
-      handler: customEndpointHandler,
-      method: 'get',
-      path: '/my-plugin-endpoint',
+      handler: visualEditorMutationHandler,
+      method: 'post',
+      path: '/payload-visual-editor',
     })
 
     return config
@@ -132,3 +132,5 @@ const payloadVisualEditor =
 
 export { payloadVisualEditor }
 export { createEditableAttrs } from './utilities.js'
+export { buildPatchedUpdateData, applyPatchesToDocument, type VisualEditorPatch } from './documentPatches.js'
+export type { VisualEditorDocument } from './runtime.js'

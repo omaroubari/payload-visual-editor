@@ -6,6 +6,7 @@ import { RenderHero } from 'dev/heros/RenderHero'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import { createEditableAttrs } from 'payload-visual-editor'
+import { VisualEditor } from 'payload-visual-editor/client'
 
 type Args = {
   params: Promise<{
@@ -23,6 +24,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     context: {
       contentSourceMap: draft,
     },
+    draft,
     limit: 1,
     pagination: false,
     where: {
@@ -45,12 +47,29 @@ export default async function Page({ params: paramsPromise }: Args) {
   const editable = createEditableAttrs(page._sourceMap as Record<string, string> | undefined)
 
   return (
-    <main className="bg-background min-h-screen">
-      <h1 {...editable('title')} className="sr-only">
-        {page.title}
-      </h1>
-      <RenderHero {...page.hero} _sourceMap={page._sourceMap} />
-      <RenderBlocks blocks={page.layout} />
-    </main>
+    <>
+      <main className="bg-background min-h-screen">
+        <div className="mx-auto max-w-5xl px-6 pt-6">
+          <h1
+            {...editable('title')}
+            className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm"
+          >
+            {page.title}
+          </h1>
+        </div>
+        <RenderHero {...page.hero} _sourceMap={page._sourceMap} />
+        <RenderBlocks blocks={page.layout} />
+      </main>
+      {draft ? (
+        <VisualEditor
+          document={{
+            collection: 'pages',
+            hasDrafts: true,
+            id: page.id,
+          }}
+          editablePaths={['title']}
+        />
+      ) : null}
+    </>
   )
 }

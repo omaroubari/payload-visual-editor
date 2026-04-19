@@ -1,0 +1,227 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+
+import type { VisualEditorPatch } from '../documentPatches.js'
+import type { VisualEditorDocument } from '../runtime.js'
+
+type SimpleElement = HTMLElement & {
+  dataset: DOMStringMap & {
+    payloadPath?: string
+  }
+}
+
+type Props = {
+  document: VisualEditorDocument
+  editablePaths?: string[]
+}
+
+type ActiveField = {
+  path: string
+  rect: DOMRect
+}
+
+function isAllowedPath(path: string | undefined, editablePaths?: string[]) {
+  if (!path) {
+    return false
+  }
+
+  if (!editablePaths?.length) {
+    return true
+  }
+
+  return editablePaths.includes(path)
+}
+
+function isSimpleTextElement(element: Element): element is SimpleElement {
+  if (!(element instanceof HTMLElement)) {
+    return false
+  }
+
+  return (
+    element.childNodes.length === 1 &&
+    element.firstChild?.nodeType === Node.TEXT_NODE &&
+    !element.querySelector('*')
+  )
+}
+
+function readElementValue(element: SimpleElement) {
+  return element.textContent ?? ''
+}
+
+function updateElements(path: string, value: string, editablePaths?: string[]) {
+  const selector = `[data-payload-path="${CSS.escape(path)}"]`
+
+  for (const element of document.querySelectorAll(selector)) {
+    if (!isSimpleTextElement(element)) {
+      continue
+    }
+
+    if (!isAllowedPath(element.dataset.payloadPath, editablePaths)) {
+      continue
+    }
+
+    element.textContent = value
+  }
+}
+
+export function VisualEditor({ document: visualDocument, editablePaths }: Props) {
+  const [activeField, setActiveField] = useState<ActiveField | null>(null)
+  const [patches, setPatches] = useState<Record<string, string>>({})
+  const [draftValue, setDraftValue] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [status, setStatus] = useState<string | null>(null)
+
+  const patchList = useMemo<VisualEditorPatch[]>(
+    () =>
+      Object.entries(patches).map(([path, value]) => ({
+        path,
+        value,
+      })),
+    [patches],
+  )
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target
+
+      if (!(target instanceof Element)) {
+        return
+      }
+
+      const marker = target.closest('[data-payload-path]')
+
+      if (!marker || !isSimpleTextElement(marker)) {
+        return
+      }
+
+      const path = marker.dataset.payloadPath
+
+      if (!path) {
+        return
+      }
+
+      if (!isAllowedPath(path, editablePaths)) {
+        return
+      }
+
+      event.preventDefault()
+
+      const resolvedPath = path
+
+      setActiveField({
+        path: resolvedPath,
+        rect: marker.getBoundingClientRect(),
+      })
+      setDraftValue(patches[resolvedPath] ?? readElementValue(marker))
+      setSaveError(null)
+      setStatus(null)
+    }
+
+    document.addEventListener('click', handleClick)
+
+    return () => {
+      document.removeEventListener('click', handleClick)
+    }
+  }, [editablePaths, patches])
+
+  async function savePatches() {
+    if (!patchList.length) {
+      return
+    }
+
+    setIsSaving(true)
+    setSaveError(null)
+    setStatus(null)
+
+    try {
+      const response = await fetch(`${visualDocument.apiPath ?? '/api'}/payload-visual-editor`, {
+        body: JSON.stringify({
+          action: 'save',
+          collection: visualDocument.collection,
+          id: visualDocument.id,
+          patches: patchList,
+        }),
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null
+        throw new Error(payload?.error ?? 'Save failed')
+      }
+
+      setPatches({})
+      setStatus(visualDocument.hasDrafts ? 'Draft saved' : 'Saved')
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Save failed')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (!activeField) {
+    return null
+  }
+
+  const top = Math.min(activeField.rect.bottom + 12, window.innerHeight - 180)
+  const left = Math.min(activeField.rect.left, window.innerWidth - 320)
+
+  return (
+    <div
+      aria-label="Visual editor popover"
+      className="fixed z-[1000] w-80 rounded-xl border border-black/10 bg-white p-4 shadow-2xl"
+      style={{
+        left,
+        top,
+      }}
+    >
+      <div className="mb-2 text-sm font-semibold text-slate-900">{activeField.path}</div>
+      <label className="mb-2 block text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+        Title
+      </label>
+      <input
+        aria-label="Edit value"
+        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none"
+        onChange={(event) => {
+          const nextValue = event.target.value
+
+          setDraftValue(nextValue)
+          setPatches((current) => ({
+            ...current,
+            [activeField.path]: nextValue,
+          }))
+          updateElements(activeField.path, nextValue, editablePaths)
+          setStatus(null)
+        }}
+        value={draftValue}
+      />
+      {saveError ? <p className="mt-2 text-sm text-red-600">{saveError}</p> : null}
+      {status ? <p className="mt-2 text-sm text-emerald-700">{status}</p> : null}
+      <div className="mt-3 flex items-center justify-end gap-2">
+        <button
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
+          onClick={() => {
+            setActiveField(null)
+            setSaveError(null)
+          }}
+          type="button"
+        >
+          Close
+        </button>
+        <button
+          className="rounded-lg bg-slate-950 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isSaving || patchList.length === 0}
+          onClick={() => void savePatches()}
+          type="button"
+        >
+          {isSaving ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+    </div>
+  )
+}
