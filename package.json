@@ -42,7 +42,8 @@
     "lint:fix": "eslint ./src --fix",
     "test": "pnpm test:int && pnpm test:e2e",
     "test:e2e": "playwright test",
-    "test:int": "vitest"
+    "test:int": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p dev/tsconfig.json"
   },
   "devDependencies": {
     "@ai-hero/sandcastle": "^0.4.8",

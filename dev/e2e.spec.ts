@@ -7,6 +7,7 @@ const previewSecret = process.env.PREVIEW_SECRET || '83494cd0a71ef3f0'
 test('marks the page title only in preview mode', async ({ page }) => {
   await page.goto('/home')
   await expect(page.locator('[data-payload-path="title"]')).toHaveCount(0)
+  await expect(page.getByLabel('Visual editor popover')).toHaveCount(0)
 
   await page.goto('/admin')
   await page.fill('#field-email', devUser.email)
@@ -17,6 +18,25 @@ test('marks the page title only in preview mode', async ({ page }) => {
   await page.goto(`/next/preview?path=%2Fhome&previewSecret=${previewSecret}`)
   await expect(page).toHaveURL(/\/home$/)
 
-  await expect(page.locator('[data-payload-path="title"]')).toHaveCount(1)
-  await expect(page.locator('[data-payload-path="title"]')).toHaveText('Home')
+  const title = page.locator('[data-payload-path="title"]')
+  const nextTitle = `Home Draft ${Date.now()}`
+
+  await expect(title).toHaveCount(1)
+  await expect(title).toHaveText('Home')
+
+  await title.click()
+  await expect(page.getByLabel('Visual editor popover')).toBeVisible()
+  await page.getByLabel('Edit value').fill(nextTitle)
+  await expect(title).toHaveText(nextTitle)
+
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Draft saved')).toBeVisible()
+
+  await page.reload()
+  await expect(title).toHaveText(nextTitle)
+
+  await title.click()
+  await page.getByLabel('Edit value').fill('Home')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Draft saved')).toBeVisible()
 })
