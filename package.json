@@ -35,7 +35,7 @@
     "dev": "next dev dev --webpack",
     "dev:generate-importmap": "pnpm dev:payload generate:importmap",
     "dev:generate-types": "pnpm dev:payload generate:types",
-    "dev:payload": "cross-env PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
+    "dev:payload": "cross-env TSX_TSCONFIG_PATH=./dev/tsconfig.json PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
     "generate:importmap": "pnpm dev:generate-importmap",
     "generate:types": "pnpm dev:generate-types",
     "lint": "eslint",
