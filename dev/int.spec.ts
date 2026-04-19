@@ -118,11 +118,12 @@ describe('Visual editor save mutation', () => {
     const nextTitle = `Home Draft ${Date.now()}`
 
     const response = await visualEditorMutationHandler({
+      context: { disableRevalidate: true },
       headers: new Headers(),
       json: async () => ({
+        id: page.id,
         action: 'save',
         collection: 'pages',
-        id: page.id,
         patches: [{ path: 'title', value: nextTitle }],
       }),
       payload,
@@ -132,25 +133,25 @@ describe('Visual editor save mutation', () => {
     expect(response.status).toBe(200)
 
     const draftPage = await payload.findByID({
+      id: page.id,
       collection: 'pages',
       draft: true,
-      id: page.id,
     })
     const publishedPage = await payload.findByID({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
     })
 
     expect(draftPage.title).toBe(nextTitle)
     expect(publishedPage.title).toBe('Home')
 
     await payload.update({
+      id: page.id,
       collection: 'pages',
       data: {
         title: 'Home',
       },
       draft: true,
-      id: page.id,
     })
   })
 })

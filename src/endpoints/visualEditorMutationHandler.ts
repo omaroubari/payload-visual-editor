@@ -51,21 +51,21 @@ export const visualEditorMutationHandler: PayloadHandler = async (req) => {
 
   try {
     const currentDocument = (await req.payload.findByID({
+      id: body.id,
       collection: body.collection,
       depth: 0,
       draft: collectionHasDrafts(req, body.collection),
-      id: body.id,
       req,
     })) as unknown as Record<string, unknown>
 
     const data = buildPatchedUpdateData(currentDocument, body.patches)
 
     const updatedDocument = await req.payload.update({
+      id: body.id,
       collection: body.collection,
       data,
       depth: 0,
       draft: collectionHasDrafts(req, body.collection),
-      id: body.id,
       req,
     })
 
