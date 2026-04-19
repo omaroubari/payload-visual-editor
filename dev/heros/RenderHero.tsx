@@ -2,7 +2,17 @@ import type { Page } from '@/payload-types'
 
 import { HighImpactHero } from '@/heros/HighImpact'
 import React from 'react'
-export type HeroData = Page['hero']
+export type HeroData = {
+  _sourceMap?:
+    | {
+        [k: string]: unknown
+      }
+    | boolean
+    | null
+    | number
+    | string
+    | unknown[]
+} & Page['hero']
 
 const heroes = {
   highImpact: HighImpactHero,

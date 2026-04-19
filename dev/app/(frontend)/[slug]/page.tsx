@@ -1,10 +1,11 @@
-import type { PageBlock } from 'dev/components/blocks/RenderBlocks.js'
-import type { HeroData } from 'dev/heros/types'
+import type { Page as PageData } from '@/payload-types'
 
 import configPromise from '@payload-config'
 import { RenderBlocks } from 'dev/components/blocks/RenderBlocks.js'
 import { RenderHero } from 'dev/heros/RenderHero'
+import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
+import { createEditableAttrs } from 'payload-visual-editor'
 
 type Args = {
   params: Promise<{
@@ -12,18 +13,16 @@ type Args = {
   }>
 }
 
-type PageData = {
-  hero?: HeroData | null
-  layout?: null | PageBlock[]
-  title?: null | string
-}
-
 export default async function Page({ params: paramsPromise }: Args) {
+  const { isEnabled: draft } = await draftMode()
   const { slug = 'home' } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
 
   const pageResult = await payload.find({
     collection: 'pages',
+    context: {
+      contentSourceMap: draft,
+    },
     limit: 1,
     pagination: false,
     where: {
@@ -43,9 +42,14 @@ export default async function Page({ params: paramsPromise }: Args) {
     )
   }
 
+  const editable = createEditableAttrs(page._sourceMap as Record<string, string> | undefined)
+
   return (
     <main className="bg-background min-h-screen">
-      <RenderHero {...page.hero} />
+      <h1 {...editable('title')} className="sr-only">
+        {page.title}
+      </h1>
+      <RenderHero {...page.hero} _sourceMap={page._sourceMap} />
       <RenderBlocks blocks={page.layout} />
     </main>
   )

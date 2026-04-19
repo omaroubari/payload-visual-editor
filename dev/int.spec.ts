@@ -1,52 +1,62 @@
 import type { Payload } from 'payload'
 
 import config from '@payload-config'
-import { createPayloadRequest, getPayload } from 'payload'
+import { getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
-import { customEndpointHandler } from '../src/endpoints/customEndpointHandler.js'
+import { createEditableAttrs } from '../src/index.js'
 
 let payload: Payload
-
-afterAll(async () => {
-  await payload.destroy()
-})
 
 beforeAll(async () => {
   payload = await getPayload({ config })
 })
 
-describe('Plugin integration tests', () => {
-  test('should query custom endpoint added by plugin', async () => {
-    const request = new Request('http://localhost:3000/api/my-plugin-endpoint', {
-      method: 'GET',
-    })
+afterAll(async () => {
+  await payload.destroy()
+})
 
-    const payloadRequest = await createPayloadRequest({ config, request })
-    const response = await customEndpointHandler(payloadRequest)
-    expect(response.status).toBe(200)
-
-    const data = await response.json()
-    expect(data).toMatchObject({
-      message: 'Hello from custom endpoint',
-    })
-  })
-
-  test('can create post with custom text field added by plugin', async () => {
-    const post = await payload.create({
-      collection: 'posts',
-      data: {
-        addedByPlugin: 'added by plugin',
+describe('Preview source map integration', () => {
+  test('preview reads include a source map entry for title', async () => {
+    const { docs } = await payload.find({
+      collection: 'pages',
+      context: {
+        contentSourceMap: true,
+      },
+      limit: 1,
+      pagination: false,
+      where: {
+        slug: {
+          equals: 'home',
+        },
       },
     })
-    expect(post.addedByPlugin).toBe('added by plugin')
+
+    const page = docs[0]
+
+    expect(page).toBeDefined()
+    expect(page?._sourceMap).toMatchObject({
+      title: 'Home',
+    })
   })
 
-  test('plugin creates and seeds plugin-collection', async () => {
-    expect(payload.collections['plugin-collection']).toBeDefined()
+  test('non-preview reads omit the source map and unknown paths return no attrs', async () => {
+    const { docs } = await payload.find({
+      collection: 'pages',
+      limit: 1,
+      pagination: false,
+      where: {
+        slug: {
+          equals: 'home',
+        },
+      },
+    })
 
-    const { docs } = await payload.find({ collection: 'plugin-collection' })
+    const page = docs[0]
+    const editable = createEditableAttrs(page?._sourceMap as Record<string, string> | undefined)
 
-    expect(docs).toHaveLength(1)
+    expect(page?._sourceMap).toBeUndefined()
+    expect(editable('title')).toEqual({})
+    expect(editable('does-not-exist')).toEqual({})
   })
 })

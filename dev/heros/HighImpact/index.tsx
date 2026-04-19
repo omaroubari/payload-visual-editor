@@ -1,9 +1,9 @@
 'use client'
 
-
 import { CMSLink } from '@/components/CMSLink'
 import { HeroHeader } from 'dev/components/header'
 import { Sparkle } from 'lucide-react'
+import { createEditableAttrs } from 'payload-visual-editor'
 import React from 'react'
 
 import type { HeroData } from '../RenderHero'
@@ -22,13 +22,15 @@ export const HighImpactHero: React.FC<HeroData> = ({
   heading,
   links,
   media,
-  subheading
+  subheading,
 }) => {
   if (!heading) {
     return null
   }
 
   const imageURL = getImageURL(media)
+
+  const editable = createEditableAttrs(_sourceMap)
 
   return (
     <>
@@ -51,7 +53,10 @@ export const HighImpactHero: React.FC<HeroData> = ({
                 </div>
               ) : null}
 
-              <h1 className="mx-auto mt-8 max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">
+              <h1
+                {...editable('hero.heading')}
+                className="mx-auto mt-8 max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl"
+              >
                 {heading}
               </h1>
 

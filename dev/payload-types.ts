@@ -193,7 +193,7 @@ export interface Page {
    */
   generateSlug?: boolean | null
   slug: string
-  fieldMap?:
+  _sourceMap?:
     | {
         [k: string]: unknown
       }
@@ -212,7 +212,7 @@ export interface Page {
  */
 export interface Post {
   id: number
-  fieldMap?:
+  _sourceMap?:
     | {
         [k: string]: unknown
       }
@@ -641,7 +641,7 @@ export interface PagesSelect<T extends boolean = true> {
   publishedAt?: T
   generateSlug?: T
   slug?: T
-  fieldMap?: T
+  _sourceMap?: T
   updatedAt?: T
   createdAt?: T
   _status?: T
@@ -772,7 +772,7 @@ export interface MediaSectionBlockSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  fieldMap?: T
+  _sourceMap?: T
   updatedAt?: T
   createdAt?: T
 }

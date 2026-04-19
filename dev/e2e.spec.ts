@@ -1,15 +1,22 @@
 import { expect, test } from '@playwright/test'
 
-// this is an example Playwright e2e test
-test('should render admin panel logo', async ({ page }) => {
+import { devUser } from './helpers/credentials'
+
+const previewSecret = process.env.PREVIEW_SECRET || '83494cd0a71ef3f0'
+
+test('marks the page title only in preview mode', async ({ page }) => {
+  await page.goto('/home')
+  await expect(page.locator('[data-payload-path="title"]')).toHaveCount(0)
+
   await page.goto('/admin')
-
-  // login
-  await page.fill('#field-email', 'dev@payloadcms.com')
-  await page.fill('#field-password', 'test')
+  await page.fill('#field-email', devUser.email)
+  await page.fill('#field-password', devUser.password)
   await page.click('.form-submit button')
-
-  // should show dashboard
   await expect(page).toHaveTitle(/Dashboard/)
-  await expect(page.locator('.graphic-icon')).toBeVisible()
+
+  await page.goto(`/next/preview?path=%2Fhome&previewSecret=${previewSecret}`)
+  await expect(page).toHaveURL(/\/home$/)
+
+  await expect(page.locator('[data-payload-path="title"]')).toHaveCount(1)
+  await expect(page.locator('[data-payload-path="title"]')).toHaveText('Home')
 })

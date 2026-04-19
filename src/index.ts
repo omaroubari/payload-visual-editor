@@ -1,6 +1,53 @@
-import type { CollectionSlug, Config } from 'payload'
+import type { CollectionAfterReadHook, CollectionSlug, Config, FieldHook } from 'payload'
 
 import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
+
+type Value = { [key: string]: Value } | null | string | undefined | Value[]
+
+const populateSourceMap: FieldHook = ({ data }) => {
+  if (!data) {
+    return
+  }
+
+  const _sourceMap: Record<string, string> = {}
+
+  function flatten(key: string, value: Value): void {
+    if (value === null || value === undefined) {
+      return
+    }
+
+    if (typeof value === 'string') {
+      _sourceMap[key] = value
+      return
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        flatten(key ? `${key}.${index}` : `${index}`, item)
+      })
+      return
+    }
+    if (typeof value === 'object') {
+      for (const objectKey of Object.keys(value)) {
+        const nextKey = key ? `${key}.${objectKey}` : objectKey
+        flatten(nextKey, value[objectKey])
+      }
+      return
+    }
+  }
+
+  for (const key of Object.keys(data)) {
+    flatten(key, data[key])
+  }
+
+  return _sourceMap
+}
+
+const sourceMapContextHandler: CollectionAfterReadHook = ({ context, doc }) => {
+  if (context.contentSourceMap !== true) {
+    return { ...doc, _sourceMap: undefined }
+  }
+}
 
 export type PayloadVisualEditorConfig = {
   /**
@@ -10,22 +57,12 @@ export type PayloadVisualEditorConfig = {
   disabled?: boolean
 }
 
-export const payloadVisualEditor =
+const payloadVisualEditor =
   (pluginOptions: PayloadVisualEditorConfig) =>
   (config: Config): Config => {
     if (!config.collections) {
       config.collections = []
     }
-
-    config.collections.push({
-      slug: 'plugin-collection',
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-      ],
-    })
 
     if (pluginOptions.collections) {
       for (const collectionSlug in pluginOptions.collections) {
@@ -35,12 +72,22 @@ export const payloadVisualEditor =
 
         if (collection) {
           collection.fields.push({
-            name: 'addedByPlugin',
-            type: 'text',
+            name: '_sourceMap',
+            type: 'json',
             admin: {
+              disabled: true,
+              hidden: true,
               position: 'sidebar',
             },
+            hooks: {
+              afterRead: [populateSourceMap],
+            },
+            virtual: true,
           })
+
+          collection.hooks ??= {}
+          collection.hooks.afterRead ??= []
+          collection.hooks.afterRead.push(sourceMapContextHandler)
         }
       }
     }
@@ -69,10 +116,10 @@ export const payloadVisualEditor =
       config.admin.components.beforeDashboard = []
     }
 
-    config.admin.components.beforeDashboard.push(
-      `payload-visual-editor/client#BeforeDashboardClient`,
-    )
-    config.admin.components.beforeDashboard.push(`payload-visual-editor/rsc#BeforeDashboardServer`)
+    // config.admin.components.beforeDashboard.push(
+    //   `payload-visual-editor/client#BeforeDashboardClient`,
+    // )
+    // config.admin.components.beforeDashboard.push(`payload-visual-editor/rsc#BeforeDashboardServer`)
 
     config.endpoints.push({
       handler: customEndpointHandler,
@@ -80,32 +127,8 @@ export const payloadVisualEditor =
       path: '/my-plugin-endpoint',
     })
 
-    const incomingOnInit = config.onInit
-
-    config.onInit = async (payload) => {
-      // Ensure we are executing any existing onInit functions before running our own.
-      if (incomingOnInit) {
-        await incomingOnInit(payload)
-      }
-
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        where: {
-          id: {
-            equals: 'seeded-by-plugin',
-          },
-        },
-      })
-
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          data: {
-            id: 'seeded-by-plugin',
-          },
-        })
-      }
-    }
-
     return config
   }
+
+export { payloadVisualEditor }
+export { createEditableAttrs } from './utilities.js'
