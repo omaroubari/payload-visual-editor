@@ -54,7 +54,7 @@ afterAll(async () => {
 })
 
 describe('Preview source map integration', () => {
-  test('preview reads include a source map entry for title', async () => {
+  test('preview reads include schema-aware source map entries for root and nested text fields', async () => {
     const { docs } = await payload.find({
       collection: 'pages',
       context: {
@@ -73,8 +73,12 @@ describe('Preview source map integration', () => {
 
     expect(page).toBeDefined()
     expect(page?._sourceMap).toMatchObject({
+      'hero.heading': 'Build 10x Faster with Mist',
+      'hero.subheading': 'Craft. Build. Ship modern websites with AI support.',
       title: 'Home',
     })
+    expect(page?._sourceMap).not.toHaveProperty('hero.type')
+    expect(page?._sourceMap).not.toHaveProperty('layout.0.heading')
   })
 
   test('non-preview reads omit the source map and unknown paths return no attrs', async () => {
@@ -91,10 +95,12 @@ describe('Preview source map integration', () => {
 
     const page = docs[0]
     const editable = createEditableAttrs(page?._sourceMap as Record<string, string> | undefined)
+    const editableWithEmptyValue = createEditableAttrs({ title: '' })
 
     expect(page?._sourceMap).toBeUndefined()
     expect(editable('title')).toEqual({})
     expect(editable('does-not-exist')).toEqual({})
+    expect(editableWithEmptyValue('title')).toEqual({ 'data-payload-path': 'title' })
   })
 })
 
@@ -119,6 +125,30 @@ describe('Visual editor save mutation', () => {
         [{ path: 'hero.heading', value: 'Updated Home' }],
       ),
     ).toThrow('must resolve to an existing string field')
+  })
+
+  test('applyPatchesToDocument updates existing nested string paths', () => {
+    expect(
+      applyPatchesToDocument(
+        {
+          hero: {
+            heading: 'Build 10x Faster with Mist',
+            subheading: 'Craft. Build. Ship modern websites with AI support.',
+          },
+          title: 'Home',
+        },
+        [
+          { path: 'hero.heading', value: 'Nested Heading' },
+          { path: 'hero.subheading', value: 'Nested Subheading' },
+        ],
+      ),
+    ).toMatchObject({
+      hero: {
+        heading: 'Nested Heading',
+        subheading: 'Nested Subheading',
+      },
+      title: 'Home',
+    })
   })
 
   test('save mutation persists title changes as a draft update for pages', async () => {
