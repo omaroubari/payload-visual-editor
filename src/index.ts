@@ -1,47 +1,17 @@
-import type { CollectionAfterReadHook, CollectionSlug, Config, FieldHook } from 'payload'
+import type { CollectionAfterReadHook, CollectionSlug, Config, Field, FieldHook } from 'payload'
 
 import { visualEditorMutationHandler } from './endpoints/visualEditorMutationHandler.js'
+import { buildSourceMap } from './sourceMap.js'
 
-type Value = { [key: string]: Value } | null | string | undefined | Value[]
+const createPopulateSourceMap =
+  (fields: Field[]): FieldHook =>
+  ({ data }) => {
+    if (!data) {
+      return
+    }
 
-const populateSourceMap: FieldHook = ({ data }) => {
-  if (!data) {
-    return
+    return buildSourceMap(fields, data)
   }
-
-  const _sourceMap: Record<string, string> = {}
-
-  function flatten(key: string, value: Value): void {
-    if (value === null || value === undefined) {
-      return
-    }
-
-    if (typeof value === 'string') {
-      _sourceMap[key] = value
-      return
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        flatten(key ? `${key}.${index}` : `${index}`, item)
-      })
-      return
-    }
-    if (typeof value === 'object') {
-      for (const objectKey of Object.keys(value)) {
-        const nextKey = key ? `${key}.${objectKey}` : objectKey
-        flatten(nextKey, value[objectKey])
-      }
-      return
-    }
-  }
-
-  for (const key of Object.keys(data)) {
-    flatten(key, data[key])
-  }
-
-  return _sourceMap
-}
 
 const sourceMapContextHandler: CollectionAfterReadHook = ({ context, doc }) => {
   if (context.contentSourceMap !== true) {
@@ -71,6 +41,8 @@ const payloadVisualEditor =
         )
 
         if (collection) {
+          const sourceMapFields = [...collection.fields]
+
           collection.fields.push({
             name: '_sourceMap',
             type: 'json',
@@ -80,7 +52,7 @@ const payloadVisualEditor =
               position: 'sidebar',
             },
             hooks: {
-              afterRead: [populateSourceMap],
+              afterRead: [createPopulateSourceMap(sourceMapFields)],
             },
             virtual: true,
           })
@@ -132,5 +104,10 @@ const payloadVisualEditor =
 
 export { payloadVisualEditor }
 export { createEditableAttrs } from './utilities.js'
-export { buildPatchedUpdateData, applyPatchesToDocument, type VisualEditorPatch } from './documentPatches.js'
+export {
+  buildPatchedUpdateData,
+  applyPatchesToDocument,
+  type VisualEditorPatch,
+} from './documentPatches.js'
+export { buildSourceMap } from './sourceMap.js'
 export type { VisualEditorDocument } from './runtime.js'

@@ -61,7 +61,10 @@ export const HighImpactHero: React.FC<HeroData> = ({
               </h1>
 
               {subheading ? (
-                <p className="text-muted-foreground mx-auto my-6 max-w-xl text-balance text-xl">
+                <p
+                  {...editable('hero.subheading')}
+                  className="text-muted-foreground mx-auto my-6 max-w-xl text-balance text-xl"
+                >
                   {subheading}
                 </p>
               ) : null}

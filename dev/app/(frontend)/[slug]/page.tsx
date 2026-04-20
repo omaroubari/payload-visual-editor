@@ -67,7 +67,7 @@ export default async function Page({ params: paramsPromise }: Args) {
             hasDrafts: true,
             id: page.id,
           }}
-          editablePaths={['title']}
+          editablePaths={['title', 'hero.heading', 'hero.subheading']}
         />
       ) : null}
     </>

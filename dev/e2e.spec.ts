@@ -7,7 +7,7 @@ const previewURL = `/next/preview?path=%2Fhome&previewSecret=${previewSecret}`
 const nonDraftPreviewURL = `/next/preview?path=%2Fposts%2Fnon-draft-post&previewSecret=${previewSecret}`
 
 test('edits draft and non-draft preview documents', async ({ page }) => {
-  test.setTimeout(90_000)
+  test.setTimeout(150_000)
 
   const visualEditorReady = page.locator('[data-payload-visual-editor-ready="true"]')
 
@@ -51,6 +51,34 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await expect(page).toHaveURL(/\/home$/, { timeout: 30_000 })
   await expect(visualEditorReady).toHaveCount(1)
   await expect(title).toHaveText(nextTitle)
+
+  const subheading = page.locator('[data-payload-path="hero.subheading"]')
+  await expect(subheading).toHaveCount(1)
+
+  const originalSubheading = (await subheading.textContent()) ?? ''
+  const nextSubheading = `Nested textarea draft ${Date.now()}`
+
+  await subheading.click()
+  await expect(page.getByLabel('Visual editor popover')).toBeVisible()
+  await page.getByLabel('Edit value').fill(nextSubheading)
+  await expect(subheading).toHaveText(nextSubheading)
+
+  await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Draft saved')).toBeVisible()
+
+  await page.goto(previewURL, {
+    waitUntil: 'commit',
+  })
+  await expect(page).toHaveURL(/\/home$/, { timeout: 30_000 })
+  await expect(visualEditorReady).toHaveCount(1)
+  await expect(subheading).toHaveText(nextSubheading)
+
+  await subheading.click()
+  await page.getByLabel('Edit value').fill(originalSubheading)
+  await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Draft saved')).toBeVisible()
 
   await title.click()
   await page.getByLabel('Edit value').fill(originalTitle)
