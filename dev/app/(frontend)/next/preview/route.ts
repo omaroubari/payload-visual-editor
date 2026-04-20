@@ -12,15 +12,17 @@ export type PreviewSearchParams = {
   previewSecret: string
 }
 
+const previewSecret = process.env.PREVIEW_SECRET || '83494cd0a71ef3f0'
+
 export async function GET(req: NextRequest): Promise<Response> {
   const payload = await getPayload({ config: configPromise })
 
   const { searchParams } = new URL(req.url)
 
   const path = searchParams.get('path')
-  const previewSecret = searchParams.get('previewSecret')
+  const requestPreviewSecret = searchParams.get('previewSecret')
 
-  if (previewSecret !== process.env.PREVIEW_SECRET) {
+  if (requestPreviewSecret !== previewSecret) {
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
 

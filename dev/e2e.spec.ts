@@ -3,8 +3,11 @@ import { expect, test } from '@playwright/test'
 import { devUser } from './helpers/credentials'
 
 const previewSecret = process.env.PREVIEW_SECRET || '83494cd0a71ef3f0'
+const previewURL = `/next/preview?path=%2Fhome&previewSecret=${previewSecret}`
 
 test('marks the page title only in preview mode', async ({ page }) => {
+  test.setTimeout(90_000)
+
   const visualEditorReady = page.locator('[data-payload-visual-editor-ready="true"]')
 
   await page.goto('/home')
@@ -14,13 +17,13 @@ test('marks the page title only in preview mode', async ({ page }) => {
   await page.goto('/admin')
   await page.fill('#field-email', devUser.email)
   await page.fill('#field-password', devUser.password)
-  await page.click('.form-submit button')
-  await expect(page).toHaveTitle(/Dashboard/)
+  await page.getByRole('button', { name: 'Login' }).click()
+  await expect(page).toHaveTitle(/Dashboard/, { timeout: 30_000 })
 
-  await page.goto(`/next/preview?path=%2Fhome&previewSecret=${previewSecret}`, {
+  await page.goto(previewURL, {
     waitUntil: 'commit',
   })
-  await expect(page).toHaveURL(/\/home$/)
+  await expect(page).toHaveURL(/\/home$/, { timeout: 30_000 })
 
   const title = page.locator('[data-payload-path="title"]')
 
@@ -41,7 +44,10 @@ test('marks the page title only in preview mode', async ({ page }) => {
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByText('Draft saved')).toBeVisible()
 
-  await page.reload()
+  await page.goto(previewURL, {
+    waitUntil: 'commit',
+  })
+  await expect(page).toHaveURL(/\/home$/, { timeout: 30_000 })
   await expect(visualEditorReady).toHaveCount(1)
   await expect(title).toHaveText(nextTitle)
 

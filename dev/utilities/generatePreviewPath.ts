@@ -6,6 +6,8 @@ const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
   posts: '/posts',
 }
 
+const previewSecret = process.env.PREVIEW_SECRET || '83494cd0a71ef3f0'
+
 type Props = {
   collection: keyof typeof collectionPrefixMap
   req: PayloadRequest
@@ -22,7 +24,7 @@ export const generatePreviewPath = ({ slug, collection }: Props) => {
 
   const encodedParams = new URLSearchParams({
     path: `${collectionPrefixMap[collection]}/${encodedSlug}`,
-    previewSecret: process.env.PREVIEW_SECRET || '',
+    previewSecret,
   } satisfies PreviewSearchParams)
 
   const url = `/next/preview?${encodedParams.toString()}`
