@@ -4,6 +4,11 @@ import { useEffect, useMemo, useState } from 'react'
 
 import type { VisualEditorPatch } from '../documentPatches.js'
 import type { VisualEditorDocument } from '../runtime.js'
+import {
+  getLocalReplacement,
+  getPendingValue,
+  isAllowedEditablePath,
+} from '../localPreviewState.js'
 
 type SimpleElement = {
   dataset: {
@@ -19,18 +24,6 @@ type Props = {
 type ActiveField = {
   path: string
   rect: DOMRect
-}
-
-function isAllowedPath(path: string | undefined, editablePaths?: string[]) {
-  if (!path) {
-    return false
-  }
-
-  if (!editablePaths?.length) {
-    return true
-  }
-
-  return editablePaths.includes(path)
 }
 
 function isSimpleTextElement(element: Element): element is SimpleElement {
@@ -53,15 +46,20 @@ function updateElements(path: string, value: string, editablePaths?: string[]) {
   const selector = `[data-payload-path="${CSS.escape(path)}"]`
 
   for (const element of document.querySelectorAll(selector)) {
-    if (!isSimpleTextElement(element)) {
+    const replacement = getLocalReplacement(
+      {
+        path: element instanceof HTMLElement ? element.dataset.payloadPath : undefined,
+        replaceable: isSimpleTextElement(element),
+      },
+      { path, value },
+      editablePaths,
+    )
+
+    if (replacement === undefined) {
       continue
     }
 
-    if (!isAllowedPath(element.dataset.payloadPath, editablePaths)) {
-      continue
-    }
-
-    element.textContent = value
+    element.textContent = replacement
   }
 }
 
@@ -93,7 +91,7 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
 
       const marker = target.closest('[data-payload-path]')
 
-      if (!marker || !isSimpleTextElement(marker)) {
+      if (!marker || !(marker instanceof HTMLElement)) {
         return
       }
 
@@ -103,7 +101,7 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
         return
       }
 
-      if (!isAllowedPath(path, editablePaths)) {
+      if (!isAllowedEditablePath(path, editablePaths)) {
         return
       }
 
@@ -115,7 +113,13 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
         path: resolvedPath,
         rect: marker.getBoundingClientRect(),
       })
-      setDraftValue(patches[resolvedPath] ?? readElementValue(marker))
+      setDraftValue(
+        getPendingValue(
+          resolvedPath,
+          patches,
+          isSimpleTextElement(marker) ? readElementValue(marker) : (marker.textContent ?? ''),
+        ),
+      )
       setSaveError(null)
       setStatus(null)
     }

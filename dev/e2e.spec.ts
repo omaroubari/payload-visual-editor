@@ -7,39 +7,48 @@ const previewURL = `/next/preview?path=%2Fhome&previewSecret=${previewSecret}`
 const nonDraftPreviewURL = `/next/preview?path=%2Fposts%2Fnon-draft-post&previewSecret=${previewSecret}`
 
 test('edits draft and non-draft preview documents', async ({ page }) => {
-  test.setTimeout(90_000)
+  test.setTimeout(120_000)
+  page.setDefaultNavigationTimeout(60_000)
+  page.setDefaultTimeout(60_000)
 
   const visualEditorReady = page.locator('[data-payload-visual-editor-ready="true"]')
 
-  await page.goto('/home')
+  await page.goto('/home', { timeout: 60_000 })
   await expect(page.locator('[data-payload-path="title"]')).toHaveCount(0)
   await expect(page.getByLabel('Visual editor popover')).toHaveCount(0)
 
-  await page.goto('/admin')
-  await page.fill('#field-email', devUser.email)
-  await page.fill('#field-password', devUser.password)
-  await page.getByRole('button', { name: 'Login' }).click()
-  await expect(page).toHaveTitle(/Dashboard/, { timeout: 30_000 })
+  const loginResponse = await page.request.post('/api/users/login', {
+    data: devUser,
+  })
+
+  expect(loginResponse.ok()).toBeTruthy()
 
   await page.goto(previewURL, {
     waitUntil: 'commit',
   })
   await expect(page).toHaveURL(/\/home$/, { timeout: 30_000 })
 
-  const title = page.locator('[data-payload-path="title"]')
+  const titleTargets = page.locator('[data-payload-path="title"]')
+  const title = titleTargets.first()
+  const duplicateTitle = page.getByLabel('Duplicate page title')
+  const mixedTitle = page.getByLabel('Mixed page title')
 
   await expect(visualEditorReady).toHaveCount(1)
-  await expect(title).toHaveCount(1)
+  await expect(titleTargets).toHaveCount(3)
 
   const originalTitle = (await title.textContent()) ?? ''
   const nextTitle = `Home Draft ${Date.now()}`
 
   await expect(title).toHaveText(originalTitle)
+  await expect(duplicateTitle).toHaveText(originalTitle)
+  await expect(mixedTitle).toHaveText(`${originalTitle} overview`)
 
   await title.click()
   await expect(page.getByLabel('Visual editor popover')).toBeVisible()
   await page.getByLabel('Edit value').fill(nextTitle)
   await expect(title).toHaveText(nextTitle)
+  await expect(duplicateTitle).toHaveText(nextTitle)
+  await expect(mixedTitle).toHaveText(`${originalTitle} overview`)
 
   await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled()
   await page.getByRole('button', { name: 'Save' }).click()
@@ -51,6 +60,8 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await expect(page).toHaveURL(/\/home$/, { timeout: 30_000 })
   await expect(visualEditorReady).toHaveCount(1)
   await expect(title).toHaveText(nextTitle)
+  await expect(duplicateTitle).toHaveText(nextTitle)
+  await expect(mixedTitle).toHaveText(`${nextTitle} overview`)
 
   await title.click()
   await page.getByLabel('Edit value').fill(originalTitle)

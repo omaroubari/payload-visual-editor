@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { applyPatchesToDocument } from '../src/documentPatches.js'
 import { visualEditorMutationHandler } from '../src/endpoints/visualEditorMutationHandler.js'
 import { createEditableAttrs } from '../src/index.js'
+import { getLocalReplacement, getPendingValue } from '../src/localPreviewState.js'
 
 let payload: Payload
 
@@ -64,6 +65,34 @@ describe('Preview source map integration', () => {
 })
 
 describe('Visual editor save mutation', () => {
+  test('local preview state synchronizes duplicate replaceable targets and skips mixed-content replacements', () => {
+    const patches = {
+      title: 'Pending Home',
+    }
+
+    expect(getPendingValue('title', patches, 'Home')).toBe('Pending Home')
+    expect(
+      getLocalReplacement(
+        {
+          path: 'title',
+          replaceable: true,
+        },
+        { path: 'title', value: 'Pending Home' },
+        ['title'],
+      ),
+    ).toBe('Pending Home')
+    expect(
+      getLocalReplacement(
+        {
+          path: 'title',
+          replaceable: false,
+        },
+        { path: 'title', value: 'Pending Home' },
+        ['title'],
+      ),
+    ).toBeUndefined()
+  })
+
   test('applyPatchesToDocument updates an existing string path and rejects missing paths', () => {
     expect(
       applyPatchesToDocument(
