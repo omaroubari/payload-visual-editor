@@ -73,6 +73,7 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || 'test-secret_key',
   sharp,
   typescript: {
+    autoGenerate: false,
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
