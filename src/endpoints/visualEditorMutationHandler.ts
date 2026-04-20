@@ -2,22 +2,22 @@ import type { CollectionSlug, PayloadHandler } from 'payload'
 
 import { buildPatchedUpdateData, type VisualEditorPatch } from '../documentPatches.js'
 
-type SaveMutationRequest = {
-  action: 'save'
+type VisualEditorMutationRequest = {
+  action: 'publish' | 'save'
   collection: CollectionSlug
   id: number | string
   patches: VisualEditorPatch[]
 }
 
-function isSaveMutationRequest(value: unknown): value is SaveMutationRequest {
+function isVisualEditorMutationRequest(value: unknown): value is VisualEditorMutationRequest {
   if (!value || typeof value !== 'object') {
     return false
   }
 
-  const candidate = value as Partial<SaveMutationRequest>
+  const candidate = value as Partial<VisualEditorMutationRequest>
 
   return (
-    candidate.action === 'save' &&
+    (candidate.action === 'save' || candidate.action === 'publish') &&
     typeof candidate.collection === 'string' &&
     (typeof candidate.id === 'string' || typeof candidate.id === 'number') &&
     Array.isArray(candidate.patches)
@@ -31,8 +31,15 @@ function collectionHasDrafts(req: Parameters<PayloadHandler>[0], collectionSlug:
 }
 
 export const visualEditorMutationHandler: PayloadHandler = async (req) => {
-  if (!req.user) {
+  const user = req.user ?? (await req.payload.auth({ headers: req.headers, req })).user
+
+  if (!user) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const operationReq = {
+    ...req,
+    user,
   }
 
   if (!req.json) {
@@ -41,7 +48,7 @@ export const visualEditorMutationHandler: PayloadHandler = async (req) => {
 
   const body = await req.json()
 
-  if (!isSaveMutationRequest(body)) {
+  if (!isVisualEditorMutationRequest(body)) {
     return Response.json({ error: 'Invalid visual editor mutation payload' }, { status: 400 })
   }
 
@@ -50,23 +57,39 @@ export const visualEditorMutationHandler: PayloadHandler = async (req) => {
   }
 
   try {
+    const hasDrafts = collectionHasDrafts(req, body.collection)
+
+    if (body.action === 'publish' && !hasDrafts) {
+      return Response.json(
+        { error: 'Publish is only available for draft-enabled collections' },
+        { status: 400 },
+      )
+    }
+
     const currentDocument = (await req.payload.findByID({
       id: body.id,
       collection: body.collection,
       depth: 0,
-      draft: collectionHasDrafts(req, body.collection),
-      req,
+      draft: hasDrafts,
+      req: operationReq,
     })) as unknown as Record<string, unknown>
 
     const data = buildPatchedUpdateData(currentDocument, body.patches)
+    const updateData =
+      body.action === 'publish'
+        ? {
+            ...data,
+            _status: 'published',
+          }
+        : data
 
     const updatedDocument = await req.payload.update({
       id: body.id,
       collection: body.collection,
-      data,
+      data: updateData,
       depth: 0,
-      draft: collectionHasDrafts(req, body.collection),
-      req,
+      draft: hasDrafts,
+      req: operationReq,
     })
 
     return Response.json({ doc: updatedDocument })

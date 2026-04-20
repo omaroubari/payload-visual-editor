@@ -69,7 +69,7 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
   const [activeField, setActiveField] = useState<ActiveField | null>(null)
   const [patches, setPatches] = useState<Record<string, string>>({})
   const [draftValue, setDraftValue] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
+  const [pendingAction, setPendingAction] = useState<null | 'publish' | 'save'>(null)
   const [isReady, setIsReady] = useState(false)
   const [saveError, setSaveError] = useState<null | string>(null)
   const [status, setStatus] = useState<null | string>(null)
@@ -129,12 +129,12 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
     }
   }, [editablePaths, patches])
 
-  async function savePatches() {
+  async function mutatePatches(action: 'publish' | 'save') {
     if (!patchList.length) {
       return
     }
 
-    setIsSaving(true)
+    setPendingAction(action)
     setSaveError(null)
     setStatus(null)
 
@@ -142,7 +142,7 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
       const response = await fetch(`${visualDocument.apiPath ?? '/api'}/payload-visual-editor`, {
         body: JSON.stringify({
           id: visualDocument.id,
-          action: 'save',
+          action,
           collection: visualDocument.collection,
           patches: patchList,
         }),
@@ -159,11 +159,15 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
       }
 
       setPatches({})
-      setStatus(visualDocument.hasDrafts ? 'Draft saved' : 'Saved')
+      setStatus(
+        action === 'publish' ? 'Published' : visualDocument.hasDrafts ? 'Draft saved' : 'Saved',
+      )
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : 'Save failed')
+      setSaveError(
+        error instanceof Error ? error.message : `${action === 'publish' ? 'Publish' : 'Save'} failed`,
+      )
     } finally {
-      setIsSaving(false)
+      setPendingAction(null)
     }
   }
 
@@ -220,13 +224,23 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
           >
             Close
           </button>
+          {visualDocument.hasDrafts ? (
+            <button
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={pendingAction !== null || patchList.length === 0}
+              onClick={() => void mutatePatches('publish')}
+              type="button"
+            >
+              {pendingAction === 'publish' ? 'Publishing…' : 'Publish'}
+            </button>
+          ) : null}
           <button
             className="rounded-lg bg-slate-950 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isSaving || patchList.length === 0}
-            onClick={() => void savePatches()}
+            disabled={pendingAction !== null || patchList.length === 0}
+            onClick={() => void mutatePatches('save')}
             type="button"
           >
-            {isSaving ? 'Saving…' : 'Save'}
+            {pendingAction === 'save' ? 'Saving…' : 'Save'}
           </button>
         </div>
       </div>

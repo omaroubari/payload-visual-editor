@@ -12,6 +12,41 @@ let payload: Payload
 
 beforeAll(async () => {
   payload = await getPayload({ config })
+
+  const { docs } = await payload.find({
+    collection: 'pages',
+    draft: true,
+    limit: 1,
+    pagination: false,
+    where: {
+      slug: {
+        equals: 'home',
+      },
+    },
+  })
+
+  const page = docs[0]
+
+  if (page) {
+    await payload.update({
+      id: page.id,
+      collection: 'pages',
+      context: { disableRevalidate: true },
+      data: {
+        title: 'Home',
+      },
+    })
+
+    await payload.update({
+      id: page.id,
+      collection: 'pages',
+      context: { disableRevalidate: true },
+      data: {
+        title: 'Home',
+      },
+      draft: true,
+    })
+  }
 })
 
 afterAll(async () => {
@@ -148,6 +183,7 @@ describe('Visual editor save mutation', () => {
     await payload.update({
       id: page.id,
       collection: 'pages',
+      context: { disableRevalidate: true },
       data: {
         title: 'Home',
       },
@@ -215,6 +251,70 @@ describe('Visual editor save mutation', () => {
       collection: 'posts',
       data: {
         title: originalTitle,
+      },
+    })
+  })
+
+  test('publish mutation applies pending title changes and publishes pages', async () => {
+    const { docs } = await payload.find({
+      collection: 'pages',
+      draft: true,
+      limit: 1,
+      pagination: false,
+      where: {
+        slug: {
+          equals: 'home',
+        },
+      },
+    })
+
+    const page = docs[0]
+
+    expect(page).toBeDefined()
+
+    const userResult = await payload.find({
+      collection: 'users',
+      limit: 1,
+      pagination: false,
+      where: {
+        email: {
+          equals: 'dev@payloadcms.com',
+        },
+      },
+    })
+
+    const user = userResult.docs[0]
+    const nextTitle = `Published Home ${Date.now()}`
+
+    const response = await visualEditorMutationHandler({
+      context: { disableRevalidate: true },
+      headers: new Headers(),
+      json: async () => ({
+        id: page.id,
+        action: 'publish',
+        collection: 'pages',
+        patches: [{ path: 'title', value: nextTitle }],
+      }),
+      payload,
+      user,
+    } as never)
+
+    expect(response.status).toBe(200)
+
+    const publishedPage = await payload.findByID({
+      id: page.id,
+      collection: 'pages',
+    })
+
+    expect(publishedPage.title).toBe(nextTitle)
+    expect(publishedPage._status).toBe('published')
+
+    await payload.update({
+      id: page.id,
+      collection: 'pages',
+      context: { disableRevalidate: true },
+      data: {
+        title: 'Home',
       },
     })
   })
