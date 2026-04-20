@@ -17,8 +17,11 @@ async function enterPreview(page: Page, url: string, path: RegExp) {
     })
     await expect(page).toHaveURL(path, { timeout: 30_000 })
 
-    if ((await visualEditorReady.count()) > 0) {
+    try {
+      await expect(visualEditorReady).toHaveCount(1, { timeout: 15_000 })
       return
+    } catch {
+      // Retry the preview endpoint; draft-mode cookies can be slow to settle in dev.
     }
   }
 
@@ -27,39 +30,44 @@ async function enterPreview(page: Page, url: string, path: RegExp) {
 
 test('edits draft and non-draft preview documents', async ({ page }) => {
   test.setTimeout(180_000)
+  page.setDefaultNavigationTimeout(60_000)
+  page.setDefaultTimeout(60_000)
 
   const visualEditorReady = page.locator('[data-payload-visual-editor-ready="true"]')
 
-  await page.goto('/home')
+  await page.goto('/home', { timeout: 60_000 })
   await expect(page.locator('[data-payload-path="title"]')).toHaveCount(0)
   await expect(page.getByLabel('Visual editor popover')).toHaveCount(0)
 
-  await page.goto('/admin')
+  const loginResponse = await page.request.post('/api/users/login', {
+    data: devUser,
+  })
 
-  const emailField = page.locator('#field-email')
-
-  await expect(emailField).toBeVisible({ timeout: 120_000 })
-  await page.fill('#field-email', devUser.email)
-  await page.fill('#field-password', devUser.password)
-  await page.getByRole('button', { name: 'Login' }).click()
-  await expect(page).toHaveTitle(/Dashboard/, { timeout: 60_000 })
+  expect(loginResponse.ok()).toBeTruthy()
 
   await enterPreview(page, previewURL, /\/home$/)
 
-  const title = page.locator('[data-payload-path="title"]')
+  const titleTargets = page.locator('[data-payload-path="title"]')
+  const title = titleTargets.first()
+  const duplicateTitle = page.getByLabel('Duplicate page title')
+  const mixedTitle = page.getByLabel('Mixed page title')
 
   await expect(visualEditorReady).toHaveCount(1)
-  await expect(title).toHaveCount(1)
+  await expect(titleTargets).toHaveCount(3)
 
   const originalTitle = (await title.textContent()) ?? ''
   const nextTitle = `Home Draft ${Date.now()}`
 
   await expect(title).toHaveText(originalTitle)
+  await expect(duplicateTitle).toHaveText(originalTitle)
+  await expect(mixedTitle).toHaveText(`${originalTitle} overview`)
 
   await title.click()
   await expect(page.getByLabel('Visual editor popover')).toBeVisible()
   await page.getByLabel('Edit value').fill(nextTitle)
   await expect(title).toHaveText(nextTitle)
+  await expect(duplicateTitle).toHaveText(nextTitle)
+  await expect(mixedTitle).toHaveText(`${originalTitle} overview`)
 
   await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled()
   await page.getByRole('button', { name: 'Save' }).click()
@@ -68,6 +76,8 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await enterPreview(page, previewURL, /\/home$/)
   await expect(visualEditorReady).toHaveCount(1)
   await expect(title).toHaveText(nextTitle)
+  await expect(duplicateTitle).toHaveText(nextTitle)
+  await expect(mixedTitle).toHaveText(`${nextTitle} overview`)
 
   const subheading = page.locator('[data-payload-path="hero.subheading"]')
   await expect(subheading).toHaveCount(1)
@@ -112,7 +122,7 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await page.getByLabel('Edit value').fill(publishedTitle)
   await expect(page.getByRole('button', { name: 'Publish' })).toBeEnabled()
   await page.getByRole('button', { name: 'Publish' }).click()
-  await expect(page.getByText('Published')).toBeVisible()
+  await expect(page.getByText('Published', { exact: true })).toBeVisible()
 
   await page.goto('/next/exit-preview')
   await page.goto('/home')
@@ -126,7 +136,7 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await page.getByLabel('Edit value').fill(originalTitle)
   await expect(page.getByRole('button', { name: 'Publish' })).toBeEnabled()
   await page.getByRole('button', { name: 'Publish' }).click()
-  await expect(page.getByText('Published')).toBeVisible()
+  await expect(page.getByText('Published', { exact: true })).toBeVisible()
 
   await enterPreview(page, nonDraftPreviewURL, /\/posts\/non-draft-post$/)
 
