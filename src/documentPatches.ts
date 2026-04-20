@@ -5,6 +5,10 @@ export type VisualEditorPatch = {
 
 type JsonLike = null | string | JsonLike[] | { [key: string]: JsonLike }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && !Array.isArray(value) && typeof value === 'object'
+}
+
 function cloneValue<T>(value: T): T {
   if (typeof structuredClone === 'function') {
     return structuredClone(value)
@@ -15,6 +19,36 @@ function cloneValue<T>(value: T): T {
 
 function getPathSegments(path: string): string[] {
   return path.split('.').filter(Boolean)
+}
+
+function validatePatch(patch: unknown): VisualEditorPatch {
+  if (!isRecord(patch)) {
+    throw new Error('Patch must be an object with "path" and "value" fields')
+  }
+
+  const keys = Object.keys(patch)
+  const hasOnlySupportedKeys =
+    keys.length === 2 && keys.every((key) => key === 'path' || key === 'value')
+
+  if (!hasOnlySupportedKeys) {
+    throw new Error('Patch must only include "path" and "value" fields')
+  }
+
+  const { path, value } = patch
+
+  if (typeof path !== 'string' || !path.trim()) {
+    throw new Error('Patch path is required')
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error(`Patch value for "${path}" must be a string`)
+  }
+
+  return { path, value }
+}
+
+export function validateVisualEditorPatches(patches: unknown[]): VisualEditorPatch[] {
+  return patches.map((patch) => validatePatch(patch))
 }
 
 function getValueAtPath(value: JsonLike, path: string): JsonLike | undefined {
@@ -103,8 +137,9 @@ export function applyPatchesToDocument<T extends Record<string, unknown>>(
   patches: VisualEditorPatch[],
 ): T {
   const nextDocument = cloneValue(document)
+  const validPatches = validateVisualEditorPatches(patches)
 
-  for (const patch of patches) {
+  for (const patch of validPatches) {
     const currentValue = getValueAtPath(nextDocument as JsonLike, patch.path)
 
     if (typeof currentValue !== 'string') {
@@ -121,9 +156,12 @@ export function buildPatchedUpdateData<T extends Record<string, unknown>>(
   document: T,
   patches: VisualEditorPatch[],
 ): Record<string, unknown> {
-  const patchedDocument = applyPatchesToDocument(document, patches)
+  const validPatches = validateVisualEditorPatches(patches)
+  const patchedDocument = applyPatchesToDocument(document, validPatches)
   const updateData: Record<string, unknown> = {}
-  const rootPaths = new Set(patches.map((patch) => getPathSegments(patch.path)[0]).filter(Boolean))
+  const rootPaths = new Set(
+    validPatches.map((patch) => getPathSegments(patch.path)[0]).filter(Boolean),
+  )
 
   for (const rootPath of rootPaths) {
     setNestedValue(updateData, rootPath, patchedDocument[rootPath])
