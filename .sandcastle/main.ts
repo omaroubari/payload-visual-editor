@@ -54,7 +54,7 @@ const createSandbox = () =>
       HOME: '/home/agent',
       npm_config_cache: '/tmp/sandcastle/npm-cache',
       npm_config_store_dir: '/tmp/sandcastle/pnpm-store',
-      CODEX_HOME: '/tmp/sandcastle/codex-home',
+      CODEX_HOME: '/home/agent/.codex',
     },
     mounts: [
       {
@@ -66,8 +66,8 @@ const createSandbox = () =>
         sandboxPath: '/tmp/sandcastle/npm-cache',
       },
       {
-        hostPath: '~/.codex/auth.json',
-        sandboxPath: '/tmp/sandcastle/codex-home/auth.json',
+        hostPath: '~/.codex',
+        sandboxPath: '/home/agent/.codex',
       },
     ],
   })
