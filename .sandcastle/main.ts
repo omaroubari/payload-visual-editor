@@ -65,8 +65,8 @@ const createSandbox = () =>
         sandboxPath: '/tmp/sandcastle/npm-cache',
       },
       {
-        hostPath: '~/.codex',
-        sandboxPath: '/tmp/sandcastle/codex-home',
+        hostPath: '~/.codex/auth.json',
+        sandboxPath: '/tmp/sandcastle/codex-home/auth.json',
       },
     ],
   })
