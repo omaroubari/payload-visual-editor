@@ -4,13 +4,18 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@ai-hero/sandcastle':
+    hash: 57393a0a80c5e0aa4f5977c7cd48319e64e2fb8b4051d9133e20edf613afdf17
+    path: patches/@ai-hero__sandcastle.patch
+
 importers:
 
   .:
     devDependencies:
       '@ai-hero/sandcastle':
         specifier: ^0.4.8
-        version: 0.4.8(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/typeclass@0.39.0(effect@3.21.1))
+        version: 0.4.8(patch_hash=57393a0a80c5e0aa4f5977c7cd48319e64e2fb8b4051d9133e20edf613afdf17)(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/typeclass@0.39.0(effect@3.21.1))
       '@base-ui/react':
         specifier: ^1.4.0
         version: 1.4.0(@date-fns/tz@1.2.0)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -6784,7 +6789,7 @@ packages:
 
 snapshots:
 
-  '@ai-hero/sandcastle@0.4.8(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/typeclass@0.39.0(effect@3.21.1))':
+  '@ai-hero/sandcastle@0.4.8(patch_hash=57393a0a80c5e0aa4f5977c7cd48319e64e2fb8b4051d9133e20edf613afdf17)(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(effect@3.21.1))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/platform@0.95.0(effect@3.21.1))(effect@3.21.1))(@effect/typeclass@0.39.0(effect@3.21.1))':
     dependencies:
       '@clack/prompts': 1.2.0
       '@effect/cli': 0.74.0(@effect/platform@0.95.0(effect@3.21.1))(@effect/printer-ansi@0.48.0(@effect/typeclass@0.39.0(effect@3.21.1))(effect@3.21.1))(@effect/printer@0.48.0(@effect/typeclass@0.39.0(effect@3.21.1))(effect@3.21.1))(effect@3.21.1)

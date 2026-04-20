@@ -17,6 +17,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
@@ -27,6 +28,9 @@ RUN usermod -d /home/agent -m -l agent node
 
 # Install Codex CLI (run as root before USER agent)
 RUN pnpm add -g @openai/codex
+
+# Install chromium for playwright
+RUN pnpx playwright@1.58.2 install --with-deps chromium
 
 USER agent
 

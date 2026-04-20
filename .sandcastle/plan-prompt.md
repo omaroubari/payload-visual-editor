@@ -20,11 +20,15 @@ An issue B is **blocked by** issue A if:
 
 An issue is **unblocked** if it has zero blocking dependencies on other open issues.
 
-For each unblocked issue, assign a branch name using the format `sandcastle/issue-{id}-{slug}`.
+For each unblocked issue, assign a branch name using the format `sandcastle/issue-{id}-{slug}`. Do not work on issues that seem like they require a human-in-the-loop or PRDs.
 
 # OUTPUT
 
-Output your plan as a JSON object wrapped in `<plan>` tags:
+Output exactly one `<plan>` block containing only a raw JSON object.
+
+Do not include prose, bullets, explanations, markdown code fences, or any text before or after the JSON inside the tag.
+
+Use this exact shape:
 
 <plan>
 {"issues": [{"id": "42", "title": "Fix auth bug", "branch": "sandcastle/issue-42-fix-auth-bug"}]}

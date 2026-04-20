@@ -28,21 +28,20 @@ import { execFileSync } from 'node:child_process'
 // Raise this if your backlog is large; lower it for a quick smoke-test run.
 const MAX_ITERATIONS = 10
 
-// Hooks run inside the sandbox before the agent starts each iteration.
-// With the pnpm store mounted into the sandbox, this relinks dependencies
-// without redownloading packages each time.
-const hooks = {
+// Only branch-based sandboxes should run installs. The planner uses the default
+// head strategy, which bind-mounts the host checkout; running pnpm there would
+// try to replace the host node_modules with Linux artifacts.
+//
+// Preserved worker worktrees may already contain a Linux node_modules from a
+// prior timed-out run, so tell pnpm to purge and rebuild it non-interactively.
+const workerHooks = {
   onSandboxReady: [
     {
-      command: 'npm install',
+      command:
+        'CI=1 pnpm install --frozen-lockfile --prefer-offline --config.confirmModulesPurge=false',
     },
   ],
 }
-
-// Copy node_modules from the host into the worktree before each sandbox
-// starts. Avoids a full npm install from scratch; the hook above handles
-// platform-specific binaries and any packages added since the last copy.
-const copyToWorktree = ['node_modules']
 
 const hostPnpmStorePath = execFileSync('pnpm', ['store', 'path'], {
   encoding: 'utf8',
@@ -51,23 +50,111 @@ const hostPnpmStorePath = execFileSync('pnpm', ['store', 'path'], {
 const createSandbox = () =>
   docker({
     env: {
-      // Sandcastle configures git safe.directory before hooks run. Point the
-      // global git config at a writable sandbox-local file to avoid writing to
-      // /home/agent/.gitconfig, which can be permission-restricted.
-      GIT_CONFIG_GLOBAL: '/tmp/.gitconfig',
+      HOME: '/home/agent',
+      npm_config_cache: '/tmp/sandcastle/npm-cache',
+      npm_config_store_dir: '/tmp/sandcastle/pnpm-store',
+      CODEX_HOME: '/tmp/sandcastle/codex-home',
     },
     mounts: [
       {
         hostPath: hostPnpmStorePath,
-        sandboxPath: '/home/agent/.pnpm-store/v10',
+        sandboxPath: '/tmp/sandcastle/pnpm-store',
       },
-      { hostPath: '~/.npm', sandboxPath: '/home/agent/.npm', readonly: true },
+      {
+        hostPath: '~/.npm',
+        sandboxPath: '/tmp/sandcastle/npm-cache',
+      },
       {
         hostPath: '~/.codex',
-        sandboxPath: '/home/agent/.codex',
+        sandboxPath: '/tmp/sandcastle/codex-home',
       },
     ],
   })
+
+type PlanIssue = { id: string; title: string; branch: string }
+type PlanPayload = { issues: PlanIssue[] }
+
+const extractFirstJsonValue = (input: string) => {
+  const start = input.search(/[\[{]/)
+  if (start === -1) {
+    return null
+  }
+
+  const opener = input[start]
+  const closer = opener === '{' ? '}' : ']'
+  let depth = 0
+  let inString = false
+  let isEscaped = false
+
+  for (let i = start; i < input.length; i++) {
+    const char = input[i]
+
+    if (inString) {
+      if (isEscaped) {
+        isEscaped = false
+        continue
+      }
+
+      if (char === '\\') {
+        isEscaped = true
+        continue
+      }
+
+      if (char === '"') {
+        inString = false
+      }
+
+      continue
+    }
+
+    if (char === '"') {
+      inString = true
+      continue
+    }
+
+    if (char === opener) {
+      depth += 1
+      continue
+    }
+
+    if (char === closer) {
+      depth -= 1
+
+      if (depth === 0) {
+        return input.slice(start, i + 1)
+      }
+    }
+  }
+
+  return null
+}
+
+const parsePlanPayload = (payload: string): PlanPayload => {
+  const candidates = [
+    payload.trim(),
+    payload
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/```$/i, '')
+      .trim(),
+    payload.replace(/\\n/g, '\n').replace(/\\"/g, '"').trim(),
+  ]
+
+  for (const candidate of candidates) {
+    const jsonCandidate = extractFirstJsonValue(candidate) ?? candidate
+
+    try {
+      const parsed = JSON.parse(jsonCandidate) as Partial<PlanPayload>
+
+      if (Array.isArray(parsed.issues)) {
+        return parsed as PlanPayload
+      }
+    } catch {
+      // Try the next normalization strategy.
+    }
+  }
+
+  throw new Error('Planning agent produced an invalid <plan> payload.\n\n' + payload)
+}
 
 // ---------------------------------------------------------------------------
 // Main loop
@@ -86,7 +173,6 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   // It outputs a <plan> JSON block — we parse that to drive Phase 2.
   // -------------------------------------------------------------------------
   const plan = await sandcastle.run({
-    hooks,
     sandbox: createSandbox(),
     name: 'planner',
     // One iteration is enough: the planner just needs to read and reason,
@@ -102,22 +188,8 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   if (!planMatch) {
     throw new Error('Planning agent did not produce a <plan> tag.\n\n' + plan.stdout)
   }
-  // Some model outputs escape the payload (for example: \n{\"issues\":[]}\n),
-  // so we try raw parsing first, then decode escaped content as a fallback.
-  const parsePlanPayload = (payload: string) => {
-    const trimmed = payload.trim()
-    try {
-      return JSON.parse(trimmed)
-    } catch {
-      const unescaped = trimmed.replace(/\\n/g, '\n').replace(/\\"/g, '"').trim()
-      return JSON.parse(unescaped)
-    }
-  }
-
   // The plan JSON contains an array of issues, each with id, title, branch.
-  const { issues } = parsePlanPayload(planMatch[1]!) as {
-    issues: { id: string; title: string; branch: string }[]
-  }
+  const { issues } = parsePlanPayload(planMatch[1]!)
 
   if (issues.length === 0) {
     // No unblocked work — either everything is done or everything is blocked.
@@ -142,8 +214,8 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   const settled = await Promise.allSettled(
     issues.map((issue) =>
       sandcastle.run({
-        hooks,
-        copyToWorktree,
+        hooks: workerHooks,
+        // copyToWorktree,
         // Each agent starts on its own branch via branchStrategy on run().
         sandbox: createSandbox(),
         branchStrategy: { type: 'branch', branch: issue.branch },
@@ -209,7 +281,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   // uses to know which branches to merge and which issues to close.
   // -------------------------------------------------------------------------
   await sandcastle.run({
-    hooks,
+    hooks: workerHooks,
     sandbox: createSandbox(),
     name: 'merger',
     maxIterations: 1,

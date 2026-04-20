@@ -1,0 +1,121 @@
+diff --git a/dist/DockerLifecycle.js b/dist/DockerLifecycle.js
+index 17f9fcef3558d4bac068d30622695337f81b7217..48a8cc59517326a79231b9a75b7346e92eddf94b 100644
+--- a/dist/DockerLifecycle.js
++++ b/dist/DockerLifecycle.js
+@@ -83,6 +83,19 @@ export const startContainer = (containerName, imageName, env, options) => Effect
+         imageName,
+     ]);
+ });
++
++export const getMountedPathsUnder = (volumeMounts, rootPath) => Array.from(new Set(volumeMounts
++    .map((mount) => {
++        const parts = mount.split(":");
++        if (parts.length < 2) {
++            return undefined;
++        }
++        return parts[1];
++    })
++    .filter((path) => path !== undefined &&
++    path !== rootPath &&
++    path.startsWith(`${rootPath}/`)))).sort((a, b) => a.localeCompare(b));
++
+ /**
+  * Fix ownership of a directory inside the container.
+  * Runs as root so the target owner can write to the path.
+@@ -92,19 +105,47 @@ export const startContainer = (containerName, imageName, env, options) => Effect
+  *
+  * @param owner - chown-compatible owner spec, e.g. "1000:1000" or "agent"
+  */
+-export const chownInContainer = (containerName, owner, path) => Effect.asVoid(dockerExec([
++export const chownInContainer = (containerName, owner, path, options) => Effect.asVoid(dockerExec([
+     "exec",
+     "-u",
+     "root",
+     containerName,
+     "chown",
+-    "-R",
++    ...(options?.recursive === false ? [] : ["-R"]),
+     owner,
+     path,
+ ])).pipe(Effect.catchAll((error) => {
+     console.warn(`chown -R ${owner} ${path} in container ${containerName} failed (non-fatal): ${error.message}`);
+     return Effect.void;
+ }));
++export const chownInContainerExcludingPaths = (containerName, owner, path, excludedPaths) => Effect.gen(function* () {
++    yield* chownInContainer(containerName, owner, path, { recursive: false });
++    const args = [
++        "exec",
++        "-u",
++        "root",
++        containerName,
++        "find",
++        path,
++        "-mindepth",
++        "1",
++    ];
++    if (excludedPaths.length > 0) {
++        args.push("(", ...excludedPaths.flatMap((excludedPath, index) => [
++            ...(index === 0 ? [] : ["-o"]),
++            "-path",
++            excludedPath,
++            "-o",
++            "-path",
++            `${excludedPath}/*`,
++        ]), ")", "-prune", "-o");
++    }
++    args.push("-exec", "chown", owner, "{}", "+");
++    yield* Effect.asVoid(dockerExec(args));
++}).pipe(Effect.catchAll((error) => {
++    console.warn(`chown under ${path} in container ${containerName} failed (non-fatal): ${error.message}`);
++    return Effect.void;
++}));
+ /**
+  * Stop and remove a container without removing the image.
+  */
+diff --git a/dist/SandboxLifecycle.js b/dist/SandboxLifecycle.js
+index 81faf12c8e811dc3664298f29a8f1c9b76989429..8795cd4aae28969387c02bc9d46e210036966d77 100644
+--- a/dist/SandboxLifecycle.js
++++ b/dist/SandboxLifecycle.js
+@@ -5,7 +5,7 @@ import { Display } from "./Display.js";
+ import { CommitCollectionTimeoutError, ExecError, GitSetupTimeoutError, HookTimeoutError, MergeToHostTimeoutError, SyncError, withTimeout, } from "./errors.js";
+ import { Sandbox, } from "./SandboxFactory.js";
+ const GIT_SETUP_TIMEOUT_MS = 10_000;
+-const HOOK_TIMEOUT_MS = 60_000;
++const HOOK_TIMEOUT_MS = 300_000;
+ const COMMIT_COLLECTION_TIMEOUT_MS = 30_000;
+ const MERGE_TO_HOST_TIMEOUT_MS = 30_000;
+ const execOk = (sandbox, command, options) => Effect.flatMap(sandbox.exec(command, options), (result) => result.exitCode !== 0
+diff --git a/dist/sandboxes/docker.js b/dist/sandboxes/docker.js
+index b390142d7a1237773e5fca57ee6c7977ea58de10..efb727459fb1ce88e9313cc04881047ffb285cb5 100644
+--- a/dist/sandboxes/docker.js
++++ b/dist/sandboxes/docker.js
+@@ -9,7 +9,7 @@ import { execFile, execFileSync, spawn, } from "node:child_process";
+ import { randomUUID } from "node:crypto";
+ import { createInterface } from "node:readline";
+ import { Effect } from "effect";
+-import { startContainer, removeContainer, chownInContainer, } from "../DockerLifecycle.js";
++import { startContainer, removeContainer, chownInContainer,chownInContainerExcludingPaths, getMountedPathsUnder } from "../DockerLifecycle.js";
+ import { createBindMountSandboxProvider, } from "../SandboxProvider.js";
+ import { existsSync } from "node:fs";
+ import { homedir } from "node:os";
+@@ -39,7 +39,8 @@ export const docker = (options) => {
+             // Resolve image name
+             const imageName = configuredImageName ?? defaultImageName(createOptions.hostRepoPath);
+             const hostUid = process.getuid?.() ?? 1000;
+-            const hostGid = process.getgid?.() ?? 1000;
++          const hostGid = process.getgid?.() ?? 1000;
++          const mountedHomePaths = getMountedPathsUnder(volumeMounts, "/home/agent");
+             // Start container
+             await Effect.runPromise(startContainer(containerName, imageName, {
+                 ...createOptions.env,
+@@ -49,7 +50,9 @@ export const docker = (options) => {
+                 workdir: worktreePath,
+                 user: `${hostUid}:${hostGid}`,
+                 network: options?.network,
+-            }).pipe(Effect.andThen(chownInContainer(containerName, `${hostUid}:${hostGid}`, "/home/agent"))));
++            }).pipe(Effect.andThen(mountedHomePaths.length > 0
++                ? chownInContainerExcludingPaths(containerName, `${hostUid}:${hostGid}`, "/home/agent", mountedHomePaths)
++                : chownInContainer(containerName, `${hostUid}:${hostGid}`, "/home/agent"))));
+             // Set up signal handlers for cleanup
+             const onExit = () => {
+                 try {

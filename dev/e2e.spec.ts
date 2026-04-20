@@ -39,11 +39,15 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await expect(page.locator('[data-payload-path="title"]')).toHaveCount(0)
   await expect(page.getByLabel('Visual editor popover')).toHaveCount(0)
 
-  const loginResponse = await page.request.post('/api/users/login', {
-    data: devUser,
-  })
+  await page.goto('/admin')
 
-  expect(loginResponse.ok()).toBeTruthy()
+  const emailField = page.locator('#field-email')
+
+  await expect(emailField).toBeVisible({ timeout: 120_000 })
+  await page.fill('#field-email', devUser.email)
+  await page.fill('#field-password', devUser.password)
+  await page.getByRole('button', { name: 'Login' }).click()
+  await expect(page).toHaveTitle(/Dashboard/, { timeout: 60_000 })
 
   await enterPreview(page, previewURL, /\/home$/)
 
