@@ -65,6 +65,7 @@
     "@types/node": "22.19.9",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@vercel/stega": "^1.1.0",
     "class-variance-authority": "^0.7.1",
     "copyfiles": "2.4.1",
     "cross-env": "^7.0.3",
