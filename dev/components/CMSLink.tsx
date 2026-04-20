@@ -33,11 +33,13 @@ export const CMSLink = (props: CMSLinkType) => {
     url,
   } = props
 
+  const referencedDocument = typeof reference?.value === 'object' ? reference.value : undefined
+  const referencedSlug =
+    referencedDocument && 'slug' in referencedDocument ? referencedDocument.slug : undefined
+
   const href =
-    type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
-          reference.value.slug
-        }`
+    type === 'reference' && referencedSlug
+      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${referencedSlug}`
       : url
 
   if (!href) {return null}

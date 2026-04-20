@@ -9,7 +9,7 @@ import React from 'react'
 import type { HeroData } from '../RenderHero'
 
 const getImageURL = (media?: HeroData['media']) => {
-  if (!media || typeof media === 'string') {
+  if (!media || typeof media !== 'object') {
     return null
   }
 
@@ -30,7 +30,7 @@ export const HighImpactHero: React.FC<HeroData> = ({
 
   const imageURL = getImageURL(media)
 
-  const editable = createEditableAttrs(_sourceMap)
+  const editable = createEditableAttrs(_sourceMap as Record<string, string> | undefined)
 
   return (
     <>

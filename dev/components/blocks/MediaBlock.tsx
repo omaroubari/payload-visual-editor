@@ -2,7 +2,7 @@ import type { MediaSectionBlock as MediaSectionBlockType } from "@/payload-types
 
 
 const getImageURL = (media?: MediaSectionBlockType['media']) => {
-  if (!media || typeof media === 'string') {
+  if (!media || typeof media !== 'object') {
     return null
   }
 
