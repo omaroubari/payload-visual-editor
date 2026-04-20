@@ -49,6 +49,7 @@ const hostPnpmStorePath = execFileSync('pnpm', ['store', 'path'], {
 
 const createSandbox = () =>
   docker({
+    network: 'website_default',
     env: {
       HOME: '/home/agent',
       npm_config_cache: '/tmp/sandcastle/npm-cache',

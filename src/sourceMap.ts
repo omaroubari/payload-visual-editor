@@ -31,14 +31,14 @@ function addEditableFields({
 }): void {
   for (const field of fields) {
     switch (field.type) {
-      case 'text':
-      case 'textarea': {
-        const value = getNamedValue(source, field.name)
-
-        if (typeof value === 'string') {
-          sourceMap[appendPath(path, field.name)] = value
-        }
-
+      case 'collapsible':
+      case 'row': {
+        addEditableFields({
+          fields: field.fields,
+          path,
+          source,
+          sourceMap,
+        })
         break
       }
 
@@ -76,14 +76,14 @@ function addEditableFields({
         break
       }
 
-      case 'collapsible':
-      case 'row': {
-        addEditableFields({
-          fields: field.fields,
-          path,
-          source,
-          sourceMap,
-        })
+      case 'text':
+      case 'textarea': {
+        const value = getNamedValue(source, field.name)
+
+        if (typeof value === 'string') {
+          sourceMap[appendPath(path, field.name)] = value
+        }
+
         break
       }
     }

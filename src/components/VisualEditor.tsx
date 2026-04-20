@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import type { VisualEditorPatch } from '../documentPatches.js'
 import type { VisualEditorDocument } from '../runtime.js'
+
 import {
   getLocalReplacement,
   getPendingValue,
@@ -67,7 +68,7 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
   const [activeField, setActiveField] = useState<ActiveField | null>(null)
   const [patches, setPatches] = useState<Record<string, string>>({})
   const [draftValue, setDraftValue] = useState('')
-  const [pendingAction, setPendingAction] = useState<null | 'publish' | 'save'>(null)
+  const [pendingAction, setPendingAction] = useState<'publish' | 'save' | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [saveError, setSaveError] = useState<null | string>(null)
   const [status, setStatus] = useState<null | string>(null)
@@ -168,7 +169,9 @@ export function VisualEditor({ document: visualDocument, editablePaths }: Props)
       )
     } catch (error) {
       setSaveError(
-        error instanceof Error ? error.message : `${action === 'publish' ? 'Publish' : 'Save'} failed`,
+        error instanceof Error
+          ? error.message
+          : `${action === 'publish' ? 'Publish' : 'Save'} failed`,
       )
     } finally {
       setPendingAction(null)

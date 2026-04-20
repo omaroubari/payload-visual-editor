@@ -3,7 +3,7 @@ export type VisualEditorPatch = {
   value: string
 }
 
-type JsonLike = null | string | JsonLike[] | { [key: string]: JsonLike }
+type JsonLike = { [key: string]: JsonLike } | JsonLike[] | null | string
 
 function cloneValue<T>(value: T): T {
   if (typeof structuredClone === 'function') {
