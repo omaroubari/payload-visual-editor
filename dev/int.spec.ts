@@ -154,4 +154,68 @@ describe('Visual editor save mutation', () => {
       draft: true,
     })
   })
+
+  test('save mutation persists title changes directly for non-draft posts', async () => {
+    const { docs } = await payload.find({
+      collection: 'posts',
+      limit: 1,
+      pagination: false,
+      where: {
+        slug: {
+          equals: 'non-draft-post',
+        },
+      },
+    })
+
+    const post = docs[0] as unknown as { id: number | string; title: string } | undefined
+
+    if (!post) {
+      throw new Error('Expected seeded non-draft post')
+    }
+
+    const userResult = await payload.find({
+      collection: 'users',
+      limit: 1,
+      pagination: false,
+      where: {
+        email: {
+          equals: 'dev@payloadcms.com',
+        },
+      },
+    })
+
+    const user = userResult.docs[0]
+    const originalTitle = post.title
+    const nextTitle = `Direct Save ${Date.now()}`
+
+    const response = await visualEditorMutationHandler({
+      context: { disableRevalidate: true },
+      headers: new Headers(),
+      json: async () => ({
+        id: post.id,
+        action: 'save',
+        collection: 'posts',
+        patches: [{ path: 'title', value: nextTitle }],
+      }),
+      payload,
+      user,
+    } as never)
+
+    expect(response.status).toBe(200)
+
+    const updatedPost = await payload.findByID({
+      id: post.id,
+      collection: 'posts',
+    })
+
+    expect(updatedPost.title).toBe(nextTitle)
+
+    await payload.update({
+      id: post.id,
+      collection: 'posts',
+      data: {
+        title: originalTitle,
+      },
+    })
+  })
 })

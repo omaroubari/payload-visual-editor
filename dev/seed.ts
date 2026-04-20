@@ -202,4 +202,24 @@ export const seed = async (payload: Payload) => {
       data: homePageData as never,
     })
   }
+
+  const postsCount = await payload.count({
+    collection: 'posts',
+    where: {
+      slug: {
+        equals: 'non-draft-post',
+      },
+    },
+  })
+
+  if (!postsCount.totalDocs) {
+    await payload.create({
+      collection: 'posts',
+      data: {
+        excerpt: 'This post is saved directly because it does not use drafts.',
+        slug: 'non-draft-post',
+        title: 'Non Draft Post',
+      } as never,
+    })
+  }
 }

@@ -8,6 +8,7 @@ import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { testEmailAdapter } from './helpers/testEmailAdapter.js'
 import { seed } from './seed.js'
@@ -34,10 +35,7 @@ export default buildConfig({
   collections: [
     Users,
     Pages,
-    {
-      slug: 'posts',
-      fields: [],
-    },
+    Posts,
     {
       slug: 'media',
       fields: [],

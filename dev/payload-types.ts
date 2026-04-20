@@ -233,6 +233,9 @@ export interface Page {
  */
 export interface Post {
   id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
   _sourceMap?:
     | {
         [k: string]: unknown;
@@ -777,6 +780,9 @@ export interface MediaSectionBlockSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
   _sourceMap?: T;
   updatedAt?: T;
   createdAt?: T;
