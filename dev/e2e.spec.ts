@@ -59,6 +59,12 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await expect(visualEditorReady).toHaveCount(1)
   await expect(titleTargets).toHaveCount(3)
 
+  const unsupportedBlockText = page.getByText('Marketing Campaigns', { exact: true })
+
+  await expect(unsupportedBlockText).not.toHaveAttribute('data-payload-path', /.*/)
+  await unsupportedBlockText.click()
+  await expect(page.getByLabel('Visual editor popover')).toHaveCount(0)
+
   const originalTitle = (await title.textContent()) ?? ''
   const nextTitle = `Home Draft ${Date.now()}`
 
@@ -98,10 +104,7 @@ test('edits draft and non-draft preview documents', async ({ page }) => {
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByText('Draft saved')).toBeVisible()
 
-  await page.goto(previewURL, {
-    waitUntil: 'commit',
-  })
-  await expect(page).toHaveURL(/\/home$/, { timeout: 30_000 })
+  await enterPreview(page, previewURL, /\/home$/)
   await expect(visualEditorReady).toHaveCount(1)
   await expect(subheading).toHaveText(nextSubheading)
 
