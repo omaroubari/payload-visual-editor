@@ -2,14 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-import type { VisualEditorPatch } from '../documentPatches.js'
-import type { VisualEditorDocument } from '../runtime.js'
+import type { VisualEditorPatch } from '../../documentPatches.js'
+import type { VisualEditorDocument } from '../../runtime.js'
 
 import {
   getLocalReplacement,
   getPendingValue,
   isAllowedEditablePath,
-} from '../localPreviewState.js'
+} from '../../localPreviewState.js'
 
 type SimpleElement = {
   dataset: {
