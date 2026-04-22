@@ -103,11 +103,11 @@ const payloadVisualEditor =
   }
 
 export { payloadVisualEditor }
-export { createEditableAttrs } from './utilities.js'
 export {
-  buildPatchedUpdateData,
   applyPatchesToDocument,
+  buildPatchedUpdateData,
   type VisualEditorPatch,
 } from './documentPatches.js'
-export { buildSourceMap } from './sourceMap.js'
 export type { VisualEditorDocument } from './runtime.js'
+export { buildSourceMap } from './sourceMap.js'
+export { createEditableAttrs } from './utilities.js'
