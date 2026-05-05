@@ -1,12 +1,13 @@
 import type { CollectionSlug, PayloadHandler } from 'payload'
+import type { PayloadCMSPatch } from 'src/types.js'
 
-import { buildPatchedUpdateData, type VisualEditorPatch } from '../documentPatches.js'
+import { buildPatchedUpdateData } from '../utils/payloodcms-patches.js'
 
 type VisualEditorMutationRequest = {
   action: 'publish' | 'save'
   collection: CollectionSlug
   id: number | string
-  patches: VisualEditorPatch[]
+  patches: PayloadCMSPatch[]
 }
 
 function isVisualEditorMutationRequest(value: unknown): value is VisualEditorMutationRequest {
@@ -32,7 +33,7 @@ function collectionHasDrafts(req: Parameters<PayloadHandler>[0], collectionSlug:
 
 export const visualEditorMutationHandler: PayloadHandler = async (req) => {
   const user = req.user ?? (await req.payload.auth({ headers: req.headers, req })).user
-
+  console.log('visual editor handler')
   if (!user) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -75,6 +76,8 @@ export const visualEditorMutationHandler: PayloadHandler = async (req) => {
     })) as unknown as Record<string, unknown>
 
     const data = buildPatchedUpdateData(currentDocument, body.patches)
+
+    console.log({ data })
     const updateData =
       body.action === 'publish'
         ? {
