@@ -89,7 +89,7 @@ export const HighImpactHero: React.FC<HeroData> = ({
                   {imageURL ? (
                     <img alt={heading} className="h-auto w-full object-cover" src={imageURL} />
                   ) : (
-                    <div className="bg-muted/60 flex aspect-[16/10] items-center justify-center">
+                    <div className="bg-muted/60 flex aspect-16/10 items-center justify-center">
                       <div className="bg-background/80 rounded-2xl border border-black/5 p-8 shadow-lg shadow-black/5">
                         <p className="text-muted-foreground text-sm uppercase tracking-[0.3em]">
                           Live Preview
