@@ -1,11 +1,27 @@
 import type { Field } from 'payload'
 
-type DocumentValue = Record<string, unknown>
+// =============================================================================
+// PayloadCMS Content Source Map Utilities
+//
+// This module provides utilities for creating a source map given a PayloadCMS
+// document data and its collection's fields.
+// =============================================================================
 
-function isRecord(value: unknown): value is DocumentValue {
+/**
+ * Type guard to check if a value is a plain object (not an array or null).
+ * @param value - The value to check
+ * @returns True if value is a plain object
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && !Array.isArray(value) && typeof value === 'object'
 }
 
+/**
+ * Gets a named property value from a source object.
+ * @param source - The source object to read from
+ * @param name - The property name to retrieve
+ * @returns The property value or undefined if source is not a valid record
+ */
 function getNamedValue(source: unknown, name: string): unknown {
   if (!isRecord(source)) {
     return undefined
@@ -14,10 +30,23 @@ function getNamedValue(source: unknown, name: string): unknown {
   return source[name]
 }
 
+/**
+ * Appends a path segment to an existing path string.
+ * @param path - The existing path (can be empty string)
+ * @param segment - The segment to append
+ * @returns The combined path with segment separated by dot
+ */
 function appendPath(path: string, segment: string): string {
   return path ? `${path}.${segment}` : segment
 }
 
+/**
+ * Recursively traverses Payload fields and builds a source map of editable text values.
+ * @param params.fields - Array of Payload fields to process
+ * @param params.path - Current path in dot notation
+ * @param params.source - Source document object to extract values from
+ * @param params.sourceMap - Map to populate with path -> value entries
+ */
 function addEditableFields({
   fields,
   path,
@@ -90,6 +119,13 @@ function addEditableFields({
   }
 }
 
+/**
+ * Builds a source map from Payload fields and a document.
+ * Maps nested field paths to their string values for editing.
+ * @param fields - Array of Payload fields to extract values from
+ * @param document - The document object to extract values from
+ * @returns Record mapping field paths to their string values
+ */
 export function buildSourceMap(fields: Field[], document: unknown): Record<string, string> {
   const sourceMap: Record<string, string> = {}
 

@@ -1,13 +1,6 @@
-export type VisualEditorPatch = {
-  path: string
-  value: string
-}
+import type { Annotation, PayloadCMSPatch } from 'src/types.js'
 
 type JsonLike = { [key: string]: JsonLike } | JsonLike[] | null | string
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && !Array.isArray(value) && typeof value === 'object'
-}
 
 function cloneValue<T>(value: T): T {
   if (typeof structuredClone === 'function') {
@@ -21,46 +14,27 @@ function getPathSegments(path: string): string[] {
   return path.split('.').filter(Boolean)
 }
 
-function validatePatch(patch: unknown): VisualEditorPatch {
-  if (!isRecord(patch)) {
-    throw new Error('Patch must be an object with "path" and "value" fields')
-  }
-
-  const keys = Object.keys(patch)
-  const hasOnlySupportedKeys =
-    keys.length === 2 && keys.every((key) => key === 'path' || key === 'value')
-
-  if (!hasOnlySupportedKeys) {
-    throw new Error('Patch must only include "path" and "value" fields')
-  }
-
+function validatePatch(patch: Record<string, unknown>): PayloadCMSPatch {
   const { path, value } = patch
 
   if (typeof path !== 'string' || !path.trim()) {
-    throw new Error('Patch path is required')
+    throw new Error('PayloadCMSPatch path is required')
   }
 
   if (typeof value !== 'string') {
-    throw new Error(`Patch value for "${path}" must be a string`)
+    throw new Error(`PayloadCMSPatch value for "${path}" must be a string`)
   }
 
   return { path, value }
-}
-
-export function validateVisualEditorPatches(patches: unknown[]): VisualEditorPatch[] {
-  return patches.map((patch) => validatePatch(patch))
 }
 
 function getValueAtPath(value: JsonLike, path: string): JsonLike | undefined {
   let current: JsonLike | undefined = value
 
   for (const segment of getPathSegments(path)) {
+    // if `current` is an array, reassign its value to the current segment
     if (Array.isArray(current)) {
       const index = Number(segment)
-
-      if (!Number.isInteger(index)) {
-        return undefined
-      }
 
       current = current[index]
       continue
@@ -80,14 +54,13 @@ function setValueAtPath(target: JsonLike, path: string, nextValue: string): void
   const segments = getPathSegments(path)
 
   if (!segments.length) {
-    throw new Error('Patch path is required')
+    throw new Error('PayloadCMSPatch path is required')
   }
 
   let current = target
-
-  for (let index = 0; index < segments.length - 1; index += 1) {
+  // stop traversing one segment early so we reach the PARENT object of the final property
+  for (let index = 0; index < segments.length - 1; index++) {
     const segment = segments[index]
-
     if (Array.isArray(current)) {
       current = current[Number(segment)]
       continue
@@ -134,18 +107,21 @@ function setNestedValue(target: Record<string, unknown>, path: string, value: un
 
 export function applyPatchesToDocument<T extends Record<string, unknown>>(
   document: T,
-  patches: VisualEditorPatch[],
+  patches: PayloadCMSPatch[],
 ): T {
   const nextDocument = cloneValue(document)
-  const validPatches = validateVisualEditorPatches(patches)
+  const validPatches = patches.map((patch) => validatePatch(patch))
 
   for (const patch of validPatches) {
     const currentValue = getValueAtPath(nextDocument as JsonLike, patch.path)
 
     if (typeof currentValue !== 'string') {
-      throw new Error(`Patch path "${patch.path}" must resolve to an existing string field`)
+      throw new Error(
+        `PayloadCMSPatch path "${patch.path}" must resolve to an existing string field`,
+      )
     }
 
+    // mutates nextDocument with patch
     setValueAtPath(nextDocument as JsonLike, patch.path, patch.value)
   }
 
@@ -154,18 +130,25 @@ export function applyPatchesToDocument<T extends Record<string, unknown>>(
 
 export function buildPatchedUpdateData<T extends Record<string, unknown>>(
   document: T,
-  patches: VisualEditorPatch[],
+  patches: PayloadCMSPatch[],
 ): Record<string, unknown> {
-  const validPatches = validateVisualEditorPatches(patches)
+  const validPatches = patches.map((patch) => validatePatch(patch))
   const patchedDocument = applyPatchesToDocument(document, validPatches)
   const updateData: Record<string, unknown> = {}
+  // extract root-level fields that were modified
   const rootPaths = new Set(
     validPatches.map((patch) => getPathSegments(patch.path)[0]).filter(Boolean),
   )
-
+  // create minimal update payload
   for (const rootPath of rootPaths) {
     setNestedValue(updateData, rootPath, patchedDocument[rootPath])
   }
 
   return updateData
+}
+
+export function generatePatches(annotations: Annotation[]) {
+  const patches: PayloadCMSPatch[] = []
+  annotations.forEach((a) => patches.push({ path: a.payloadCMS.path, value: a.payloadCMS.value }))
+  return patches
 }
