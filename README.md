@@ -22,11 +22,11 @@ https://github.com/user-attachments/assets/746a7f89-88c8-44b0-87ff-1c53a08c028f
 ## Installation
 
 ```bash
-npm install payload-visual-editor
+npm install payloadcms-visual-editor
 # or
-pnpm add payload-visual-editor
+pnpm add payloadcms-visual-editor
 # or
-yarn add payload-visual-editor
+yarn add payloadcms-visual-editor
 ```
 
 ### Requirements
@@ -42,7 +42,7 @@ yarn add payload-visual-editor
 
 ```ts
 // payload.config.ts
-import { payloadVisualEditor } from 'payload-visual-editor'
+import { payloadVisualEditor } from 'payloadcms-visual-editor'
 
 export default buildConfig({
   plugins: [
@@ -63,7 +63,7 @@ Use the `createEditableAttrs` helper to extract editable paths from the `_source
 ```tsx
 // app/(frontend)/[slug]/page.tsx
 import { getPayload } from 'payload'
-import { createEditableAttrs } from 'payload-visual-editor'
+import { createEditableAttrs } from 'payloadcms-visual-editor'
 
 export default async function Page({ params }) {
   const payload = await getPayload({ config: configPromise })
@@ -92,7 +92,7 @@ export default async function Page({ params }) {
 ### 3. Mount the toolbar on your page
 
 ```tsx
-import { VisualEditorToolbar } from 'payload-visual-editor/client'
+import { VisualEditorToolbar } from 'payloadcms-visual-editor/client'
 
 {
   draft && page._sourceMap ? (
@@ -181,8 +181,8 @@ payloadVisualEditor({
 Clone the repo and install dependencies:
 
 ```bash
-git clone https://github.com/<your-org>/payload-visual-editor
-cd payload-visual-editor
+git clone https://github.com/<your-org>/payloadcms-visual-editor
+cd payloadcms-visual-editor
 pnpm install
 ```
 
