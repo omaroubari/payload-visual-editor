@@ -2280,10 +2280,10 @@ export function VisualEditorToolbar({
                 toolbarPosition && toolbarPosition.y < 100 ? styles.tooltipBelow : ''
               } ${tooltipsHidden || showSettings ? styles.tooltipsHidden : ''} ${tooltipSessionActive ? styles.tooltipsInSession : ''}`}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleControlsMouseEnter(e)
-              }
-            }}
+               if (e.key === 'Enter' || e.key === ' ') {
+                 handleControlsMouseEnter()
+               }
+             }}
             onMouseEnter={handleControlsMouseEnter}
             onMouseLeave={handleControlsMouseLeave}
           >

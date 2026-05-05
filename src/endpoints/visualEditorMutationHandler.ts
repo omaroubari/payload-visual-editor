@@ -1,5 +1,5 @@
 import type { CollectionSlug, PayloadHandler } from 'payload'
-import type { PayloadCMSPatch } from 'src/types.js'
+import type { PayloadCMSPatch } from '../types.js'
 
 import { buildPatchedUpdateData } from '../utils/payloodcms-patches.js'
 

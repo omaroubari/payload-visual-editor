@@ -34,7 +34,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     },
   })
 
-  const page = pageResult.docs[0] as PageData | undefined
+  const page = pageResult.docs[0]
 
   if (!page) {
     return (
