@@ -126,10 +126,7 @@
       "sharp",
       "esbuild",
       "unrs-resolver"
-    ],
-    "patchedDependencies": {
-      "@ai-hero/sandcastle": "patches/@ai-hero__sandcastle.patch"
-    }
+    ]
   },
   "registry": "https://registry.npmjs.org/"
 }
