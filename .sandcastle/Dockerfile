@@ -28,6 +28,7 @@ RUN usermod -d /home/agent -m -l agent node
 
 # Install Codex CLI (run as root before USER agent)
 RUN pnpm add -g @openai/codex
+RUN pnpm install -g opencode-ai
 
 # Install chromium for playwright
 RUN pnpx playwright@1.58.2 install --with-deps chromium
