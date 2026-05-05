@@ -8,7 +8,7 @@ Edit CMS content directly on your live pages. Annotate everything else.
 
 ## Features
 
-- **Inline Content Editing** — Click any CMS-managed field on your page to edit, save as draft, or publish without ever opening the admin panel
+- **Inline Content Editing** — Click any CMS-managed text field on your page to edit, save as draft, or publish without ever opening the admin panel *(text fields only — other fields coming soon)*
 - **Visual Annotation Mode** — Place numbered markers anywhere on the page — perfect for elements that live in code rather than your CMS
 - **Route Feedback Anywhere** — Export annotations as markdown, send them to a webhook (GitHub issues, CI pipelines, dev notifications), or connect to an AI agent via MCP (coming soon)
 - **Draft-Aware** — Full integration with Payload's draft mode, including save and publish from the toolbar
