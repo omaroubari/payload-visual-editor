@@ -2210,12 +2210,6 @@ export function VisualEditorToolbar({
     return styles
   }
 
-  console.log({ annotations, mode, pendingAnnotation })
-  // console.log({
-  //   effectiveReactMode,
-  //   isDevMode,
-  //   settings: OUTPUT_TO_REACT_MODE[settings.outputDetail],
-  // })
   return createPortal(
     <div
       data-agentation-accent={settings.annotationColorId}
