@@ -4,11 +4,11 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
-import { applyPatchesToDocument } from '../src/documentPatches.js'
 import { visualEditorMutationHandler } from '../src/endpoints/visualEditorMutationHandler.js'
 import { createEditableAttrs } from '../src/index.js'
 import { getLocalReplacement, getPendingValue } from '../src/localPreviewState.js'
-import { buildSourceMap } from '../src/sourceMap.js'
+import { applyPatchesToDocument } from '../src/utils/payloodcms-patches.js'
+import { buildSourceMap } from '../src/utils/source-map.js'
 
 let payload: Payload
 

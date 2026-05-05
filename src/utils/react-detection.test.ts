@@ -9,7 +9,7 @@ import {
   DEFAULT_SKIP_PATTERNS,
   getReactComponentName,
   isReactPage,
-} from './react-detection'
+} from './react-detection.js'
 
 // Define the mock fiber type
 type MockFiber = {

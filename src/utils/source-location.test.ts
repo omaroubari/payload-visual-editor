@@ -182,7 +182,9 @@ function getFiberFromElement(element: HTMLElement): MockFiberNode | null {
 }
 
 function getComponentName(fiber: MockFiberNode): string | undefined {
-  if (!fiber.type) {return undefined}
+  if (!fiber.type) {
+    return undefined
+  }
 
   // Check elementType for wrapped components (memo, forwardRef)
   if (fiber.elementType?.displayName) {
@@ -191,18 +193,26 @@ function getComponentName(fiber: MockFiberNode): string | undefined {
 
   if (typeof fiber.type === 'function') {
     const displayName = (fiber.type as { displayName?: string }).displayName
-    if (displayName) {return displayName}
+    if (displayName) {
+      return displayName
+    }
 
     const name = fiber.type.name
     // Return undefined for empty string (anonymous functions)
-    if (name && name.length > 0) {return name}
+    if (name && name.length > 0) {
+      return name
+    }
     return undefined
   }
 
   if (typeof fiber.type === 'object' && fiber.type !== null) {
     const typed = fiber.type as { displayName?: string; name?: string }
-    if (typed.displayName) {return typed.displayName}
-    if (typed.name && typed.name.length > 0) {return typed.name}
+    if (typed.displayName) {
+      return typed.displayName
+    }
+    if (typed.name && typed.name.length > 0) {
+      return typed.name
+    }
     return undefined
   }
 
@@ -1039,7 +1049,7 @@ describe('Source Location Detection', () => {
       // Create a deep tree of 100 components
       for (let i = 99; i >= 0; i--) {
         const newFiber: MockFiberNode = {
-          type () {},
+          type() {},
           _debugOwner: currentFiber,
           _debugSource: i === 0 ? createDebugSource('/src/Root.tsx', 1) : null,
           return: currentFiber,
