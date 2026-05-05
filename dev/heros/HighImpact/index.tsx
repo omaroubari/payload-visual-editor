@@ -40,7 +40,10 @@ export const HighImpactHero: React.FC<HeroData> = ({
           <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
             <div>
               {announcement ? (
-                <div className="hover:bg-foreground/5 mx-auto flex w-fit items-center justify-center gap-2 rounded-md py-0.5 pl-1 pr-3 transition-colors duration-150">
+                <div
+                  {...editable('hero.announcement')}
+                  className="hover:bg-foreground/5 mx-auto flex w-fit items-center justify-center gap-2 rounded-md py-0.5 pl-1 pr-3 transition-colors duration-150"
+                >
                   <div
                     aria-hidden
                     className="border-background bg-linear-to-b dark:inset-shadow-2xs to-foreground from-primary relative flex size-5 items-center justify-center rounded border shadow-md shadow-black/20 ring-1 ring-black/10"
