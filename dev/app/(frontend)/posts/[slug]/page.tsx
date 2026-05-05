@@ -2,19 +2,12 @@ import configPromise from '@payload-config'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import { createEditableAttrs } from 'payload-visual-editor'
-import { VisualEditor } from 'payload-visual-editor/client'
+import { VisualEditorToolbar } from 'payload-visual-editor/client'
 
 type Args = {
   params: Promise<{
     slug?: string
   }>
-}
-
-type PostData = {
-  _sourceMap?: Record<string, string>
-  excerpt: string
-  id: number | string
-  title: string
 }
 
 export default async function Post({ params: paramsPromise }: Args) {
@@ -36,7 +29,8 @@ export default async function Post({ params: paramsPromise }: Args) {
     },
   })
 
-  const post = postResult.docs[0] as unknown as PostData | undefined
+  const post = postResult.docs[0]
+  const editable = createEditableAttrs(post._sourceMap as Record<string, string> | undefined)
 
   if (!post) {
     return (
@@ -46,17 +40,12 @@ export default async function Post({ params: paramsPromise }: Args) {
     )
   }
 
-  const editable = createEditableAttrs(post._sourceMap)
-
   return (
     <>
       <main className="min-h-screen bg-slate-50 px-6 py-16">
         <article className="mx-auto max-w-3xl">
           <p className="mb-4 text-sm font-semibold uppercase text-slate-500">Non-draft post</p>
-          <h1
-            {...editable('title')}
-            className="text-5xl font-bold tracking-normal text-slate-950"
-          >
+          <h1 {...editable('title')} className="text-5xl font-bold tracking-normal text-slate-950">
             {post.title}
           </h1>
           <p {...editable('excerpt')} className="mt-6 text-xl leading-8 text-slate-700">
@@ -64,14 +53,14 @@ export default async function Post({ params: paramsPromise }: Args) {
           </p>
         </article>
       </main>
-      {preview ? (
-        <VisualEditor
-          document={{
+      {preview && post._sourceMap ? (
+        <VisualEditorToolbar
+          documentInfo={{
+            id: post.id,
             collection: 'posts',
             hasDrafts: false,
-            id: post.id,
           }}
-          editablePaths={['title', 'excerpt']}
+          editablePaths={Object.keys(post._sourceMap)}
         />
       ) : null}
     </>
