@@ -16,10 +16,8 @@ Edit CMS content directly on your live pages. Annotate everything else.
 - **Draggable & Customizable** — Repositionable toolbar, dark/light theme, 7 marker colors, keyboard shortcuts (`Cmd+Shift+F` to toggle)
 - **Per-Collection Configuration** — Enable or disable editing per Payload collection
 
-> **Screenshots coming soon.** This section will include:
->
-> - Inline editing mode in action
-> - Annotation mode with visual markers and feedback export
+## Demo
+https://github.com/user-attachments/assets/746a7f89-88c8-44b0-87ff-1c53a08c028f
 
 ## Installation
 
