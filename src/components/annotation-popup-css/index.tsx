@@ -95,8 +95,8 @@ export const AnnotationPopupCSS = function AnnotationPopupCSS({
   const [isStylesExpanded, setIsStylesExpanded] = useState(false) // Computed styles accordion state
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
-  const cancelTimerRef = useRef<null | ReturnType<typeof setTimeout>>(null)
-  const shakeTimerRef = useRef<null | ReturnType<typeof setTimeout>>(null)
+  const cancelTimerRef = useRef<null | number>(null)
+  const shakeTimerRef = useRef<null | number>(null)
 
   // Sync with parent exit state
   useEffect(() => {

@@ -26,9 +26,9 @@ interface FreezeState {
   frozenRAFQueue: FrameRequestCallback[]
   frozenTimeoutQueue: Array<() => void>
   installed: boolean
-  origRAF: typeof requestAnimationFrame
-  origSetInterval: typeof setInterval
-  origSetTimeout: typeof setTimeout
+  origRAF: Window['requestAnimationFrame']
+  origSetInterval: Window['setInterval']
+  origSetTimeout: Window['setTimeout']
   // Queues live on window so they survive HMR module re-execution
   pausedAnimations: Animation[]
 }
@@ -79,7 +79,7 @@ if (typeof window !== 'undefined' && !_s.installed) {
     handler: TimerHandler,
     timeout?: number,
     ...args: any[]
-  ): ReturnType<typeof setTimeout> => {
+  ): number => {
     if (typeof handler === 'string') {
       return _s.origSetTimeout(handler, timeout)
     }
@@ -101,7 +101,7 @@ if (typeof window !== 'undefined' && !_s.installed) {
     handler: TimerHandler,
     timeout?: number,
     ...args: any[]
-  ): ReturnType<typeof setInterval> => {
+  ): number => {
     if (typeof handler === 'string') {
       return _s.origSetInterval(handler, timeout)
     }
