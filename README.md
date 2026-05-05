@@ -219,6 +219,8 @@ pnpm build       # Build the package
 
 This plugin is based on [Agentation](https://github.com/benjitaylor/agentation) by [Benji Taylor](https://github.com/benjitaylor). The original project provides an annotation toolbar for visual feedback on web pages. This plugin adapts those concepts and integrates them with Payload CMS for inline content editing and draft-aware annotation workflows.
 
+The dev server website design is based on [Tailark's Mist component kit](https://github.com/tailark/blocks) by [Méschac Irung](https://github.com/Meschacirung).
+
 ## License
 
 [MIT](LICENSE)
