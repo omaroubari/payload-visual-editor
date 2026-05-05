@@ -1,15 +1,14 @@
 import type { CollectionAfterReadHook, CollectionSlug, Config, Field, FieldHook } from 'payload'
 
 import { visualEditorMutationHandler } from './endpoints/visualEditorMutationHandler.js'
-import { buildSourceMap } from './sourceMap.js'
+import { buildSourceMap } from './utils/source-map.js'
 
-const createPopulateSourceMap =
+const populateSourceMap =
   (fields: Field[]): FieldHook =>
   ({ data }) => {
     if (!data) {
       return
     }
-
     return buildSourceMap(fields, data)
   }
 
@@ -52,7 +51,7 @@ const payloadVisualEditor =
               position: 'sidebar',
             },
             hooks: {
-              afterRead: [createPopulateSourceMap(sourceMapFields)],
+              afterRead: [populateSourceMap(sourceMapFields)],
             },
             virtual: true,
           })
@@ -103,11 +102,5 @@ const payloadVisualEditor =
   }
 
 export { payloadVisualEditor }
-export {
-  applyPatchesToDocument,
-  buildPatchedUpdateData,
-  type VisualEditorPatch,
-} from './documentPatches.js'
-export type { VisualEditorDocument } from './runtime.js'
-export { buildSourceMap } from './sourceMap.js'
 export { createEditableAttrs } from './utilities.js'
+export { buildSourceMap } from './utils/source-map.js'
