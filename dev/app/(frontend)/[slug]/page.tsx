@@ -44,36 +44,9 @@ export default async function Page({ params: paramsPromise }: Args) {
     )
   }
 
-  const editable = createEditableAttrs(page._sourceMap as Record<string, string> | undefined)
-
   return (
     <>
       <main className="bg-background min-h-screen">
-        <div className="mx-auto max-w-5xl px-6 pt-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1
-              {...editable('title')}
-              className="inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm"
-            >
-              {page.title}
-            </h1>
-            <p
-              {...editable('title')}
-              aria-label="Duplicate page title"
-              className="text-sm font-semibold text-slate-600"
-            >
-              {page.title}
-            </p>
-            <p
-              {...editable('title')}
-              aria-label="Mixed page title"
-              className="text-sm text-slate-600"
-            >
-              <span>{page.title}</span>
-              <span> overview</span>
-            </p>
-          </div>
-        </div>
         <RenderHero {...page.hero} _sourceMap={page._sourceMap} />
         <RenderBlocks blocks={page.layout} />
       </main>
