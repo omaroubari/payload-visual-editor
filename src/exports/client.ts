@@ -1,2 +1,1 @@
-// export { BeforeDashboardClient } from '../components/BeforeDashboardClient.js'
-export { VisualEditor } from '../components/VisualEditor.js'
+export { VisualEditorToolbar } from '../components/toolbar/index.js'
