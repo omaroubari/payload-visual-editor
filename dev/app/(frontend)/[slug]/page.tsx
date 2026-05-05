@@ -6,7 +6,7 @@ import { RenderHero } from 'dev/heros/RenderHero'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import { createEditableAttrs } from 'payload-visual-editor'
-import { VisualEditor } from 'payload-visual-editor/client'
+import { VisualEditorToolbar } from 'payload-visual-editor/client'
 
 type Args = {
   params: Promise<{
@@ -77,14 +77,14 @@ export default async function Page({ params: paramsPromise }: Args) {
         <RenderHero {...page.hero} _sourceMap={page._sourceMap} />
         <RenderBlocks blocks={page.layout} />
       </main>
-      {draft ? (
-        <VisualEditor
-          document={{
+      {draft && page._sourceMap ? (
+        <VisualEditorToolbar
+          documentInfo={{
+            id: page.id,
             collection: 'pages',
             hasDrafts: true,
-            id: page.id,
           }}
-          editablePaths={['title', 'hero.heading', 'hero.subheading']}
+          editablePaths={Object.keys(page._sourceMap)}
         />
       ) : null}
     </>
