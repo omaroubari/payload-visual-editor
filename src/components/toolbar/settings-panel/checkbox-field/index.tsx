@@ -1,7 +1,7 @@
 import { useId } from 'react'
 
-import { HelpTooltip } from '../../../help-tooltip'
-import { Checkbox } from '../../../ui/checkbox'
+import { HelpTooltip } from '../../../help-tooltip/index.js'
+import { Checkbox } from '../../../ui/checkbox/index.js'
 import styles from './styles.module.scss'
 
 interface CheckboxFieldProps extends React.HTMLAttributes<HTMLDivElement> {

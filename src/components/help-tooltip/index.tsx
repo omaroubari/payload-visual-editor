@@ -1,5 +1,5 @@
-import { IconHelp } from '../icons'
-import { Tooltip } from '../ui/tooltip'
+import { IconHelp } from '../icons/index.js'
+import { Tooltip } from '../ui/tooltip/index.js'
 import styles from './styles.module.scss'
 
 interface HelpTooltipProps {
