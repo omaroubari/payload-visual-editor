@@ -69,6 +69,10 @@ const createSandbox = () =>
         hostPath: '~/.codex',
         sandboxPath: '/home/agent/.codex',
       },
+      {
+        hostPath: '~/.local/share/opencode/auth.json',
+        sandboxPath: '/home/agent/.local/share/opencode/auth.json',
+      },
     ],
   })
 
@@ -180,7 +184,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     // not write code.
     maxIterations: 1,
     // Opus for planning: dependency analysis benefits from deeper reasoning.
-    agent: sandcastle.codex('gpt-5.4', { effort: 'high' }),
+    agent: sandcastle.opencode('opencode-go/deepseek-v4-pro', {}),
     promptFile: './.sandcastle/plan-prompt.md',
   })
 
@@ -215,7 +219,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   const settled = await Promise.allSettled(
     issues.map((issue) =>
       sandcastle.run({
-        hooks: workerHooks,
+        hooks: { sandbox: workerHooks },
         // copyToWorktree,
         // Each agent starts on its own branch via branchStrategy on run().
         sandbox: createSandbox(),
@@ -224,7 +228,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
         // Give each agent plenty of room to implement and iterate on tests.
         maxIterations: 100,
         // Sonnet for execution: fast and capable enough for typical issue work.
-        agent: sandcastle.codex('gpt-5.4'),
+        agent: sandcastle.opencode('opencode-go/minimax-m2.5'),
         promptFile: './.sandcastle/implement-prompt.md',
         // Prompt arguments substitute {{TASK_ID}}, {{ISSUE_TITLE}},
         // and {{BRANCH}} placeholders in implement-prompt.md before the
@@ -282,12 +286,12 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   // uses to know which branches to merge and which issues to close.
   // -------------------------------------------------------------------------
   await sandcastle.run({
-    hooks: workerHooks,
+    hooks: { sandbox: workerHooks },
     sandbox: createSandbox(),
     name: 'merger',
     maxIterations: 1,
     // Sonnet is sufficient for merge conflict resolution.
-    agent: sandcastle.codex('gpt-5.4'),
+    agent: sandcastle.opencode('opencode-go/minimax-m2.5'),
     promptFile: './.sandcastle/merge-prompt.md',
     promptArgs: {
       // A markdown list of branch names, one per line.

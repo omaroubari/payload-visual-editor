@@ -46,7 +46,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p dev/tsconfig.json"
   },
   "devDependencies": {
-    "@ai-hero/sandcastle": "^0.5.7",
+    "@ai-hero/sandcastle": "^0.5.8",
     "@base-ui/react": "^1.4.0",
     "@eslint/eslintrc": "^3.2.0",
     "@payloadcms/db-mongodb": "3.82.1",

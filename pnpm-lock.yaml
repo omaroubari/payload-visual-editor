@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@ai-hero/sandcastle':
-        specifier: ^0.5.7
-        version: 0.5.7(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/typeclass@0.39.0(effect@3.21.2))
+        specifier: ^0.5.8
+        version: 0.5.8(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/typeclass@0.39.0(effect@3.21.2))
       '@base-ui/react':
         specifier: ^1.4.0
         version: 1.4.0(@date-fns/tz@1.2.0)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -149,8 +149,8 @@ importers:
 
 packages:
 
-  '@ai-hero/sandcastle@0.5.7':
-    resolution: {integrity: sha512-5ZznDx9LQCdOYooL+INx6+35tH44Lb/7+BYUmgWPuBXy5YD7pt14GgMHMWbx3NtSYot7VcBMrgj7UpAQmpRrDA==}
+  '@ai-hero/sandcastle@0.5.8':
+    resolution: {integrity: sha512-dOBQ5MzzO8zMJ4R3tI9SKjlezq+3JdKZDi3fYyIPoaqbdQJWpw4w429BKRry9m2+uO94Ur7W48J0wEPQKd6ybg==}
     hasBin: true
     peerDependencies:
       '@daytona/sdk': ^0.164.0
@@ -6806,7 +6806,7 @@ packages:
 
 snapshots:
 
-  '@ai-hero/sandcastle@0.5.7(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/typeclass@0.39.0(effect@3.21.2))':
+  '@ai-hero/sandcastle@0.5.8(@effect/cluster@0.57.0(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/workflow@0.17.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(effect@3.21.2))(@effect/rpc@0.74.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/sql@0.50.0(@effect/experimental@0.59.0(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/platform@0.95.0(effect@3.21.2))(effect@3.21.2))(@effect/typeclass@0.39.0(effect@3.21.2))':
     dependencies:
       '@clack/prompts': 1.3.0
       '@effect/cli': 0.74.0(@effect/platform@0.95.0(effect@3.21.2))(@effect/printer-ansi@0.48.0(@effect/typeclass@0.39.0(effect@3.21.2))(effect@3.21.2))(@effect/printer@0.48.0(@effect/typeclass@0.39.0(effect@3.21.2))(effect@3.21.2))(effect@3.21.2)
