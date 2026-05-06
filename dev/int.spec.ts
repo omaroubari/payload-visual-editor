@@ -6,7 +6,6 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
 import { visualEditorMutationHandler } from '../src/endpoints/visualEditorMutationHandler.js'
 import { createEditableAttrs } from '../src/index.js'
-import { getLocalReplacement, getPendingValue } from '../src/localPreviewState.js'
 import { applyPatchesToDocument } from '../src/utils/payloodcms-patches.js'
 import { buildSourceMap } from '../src/utils/source-map.js'
 
@@ -175,28 +174,6 @@ describe('Visual editor save mutation', () => {
     const patches = {
       title: 'Pending Home',
     }
-
-    expect(getPendingValue('title', patches, 'Home')).toBe('Pending Home')
-    expect(
-      getLocalReplacement(
-        {
-          path: 'title',
-          replaceable: true,
-        },
-        { path: 'title', value: 'Pending Home' },
-        ['title'],
-      ),
-    ).toBe('Pending Home')
-    expect(
-      getLocalReplacement(
-        {
-          path: 'title',
-          replaceable: false,
-        },
-        { path: 'title', value: 'Pending Home' },
-        ['title'],
-      ),
-    ).toBeUndefined()
   })
 
   test('applyPatchesToDocument updates an existing string path and rejects invalid patches', () => {

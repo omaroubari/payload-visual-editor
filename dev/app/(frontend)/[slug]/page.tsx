@@ -57,7 +57,6 @@ export default async function Page({ params: paramsPromise }: Args) {
             collection: 'pages',
             hasDrafts: true,
           }}
-          editablePaths={Object.keys(page._sourceMap)}
         />
       ) : null}
     </>

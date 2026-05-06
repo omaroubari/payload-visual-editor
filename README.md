@@ -102,7 +102,6 @@ import { VisualEditorToolbar } from 'payloadcms-visual-editor/client'
         collection: 'pages',
         hasDrafts: true,
       }}
-      editablePaths={Object.keys(page._sourceMap)}
     />
   ) : null
 }
@@ -135,7 +134,7 @@ payloadVisualEditor({
 | Prop           | Type                                                                 | Description                                           |
 | -------------- | -------------------------------------------------------------------- | ----------------------------------------------------- |
 | `documentInfo` | `{ id: string \| number; collection: string; hasDrafts: boolean }`   | Payload CMS document metadata for the current page    |
-| `editablePaths`| `string[]`                                                           | Array of PayloadCMS content paths that can be edited  |
+
 
 **Optional:**
 

@@ -282,18 +282,6 @@ function detectSourceFile(element: Element): string | undefined {
   return undefined
 }
 
-function isAllowedEditablePath(path: string | undefined, editablePaths?: string[]) {
-  if (!path) {
-    return false
-  }
-
-  if (!editablePaths?.length) {
-    return true
-  }
-
-  return editablePaths.includes(path)
-}
-
 function isSameAnnotationElement(
   left: Pick<Annotation, 'elementPath' | 'fullPath' | 'payloadCMS'>,
   right: Pick<Annotation, 'elementPath' | 'fullPath' | 'payloadCMS'>,
@@ -324,8 +312,6 @@ export type VisualEditorToolbarProps = {
   demoDelay?: number
   /** PayloadCMS document metadata. */
   documentInfo: PayloadCMSDocument
-  /** Array of PayloadCMS editable paths. */
-  editablePaths?: string[]
   enableDemoMode?: boolean
   /** Server URL for sync (e.g., "http://localhost:4747"). If not provided, uses localStorage only. */
   endpoint?: string
@@ -360,7 +346,6 @@ export function VisualEditorToolbar({
   demoAnnotations,
   demoDelay = 1000,
   documentInfo,
-  editablePaths,
   enableDemoMode = false,
   endpoint,
   onAnnotationAdd,
@@ -1254,7 +1239,7 @@ export function VisualEditorToolbar({
 
       const payloadField = identifyPayloadField(target)
 
-      if (!payloadField?.path || !isAllowedEditablePath(payloadField.path, editablePaths)) {
+      if (!payloadField?.path) {
         return
       }
 
@@ -1378,7 +1363,6 @@ export function VisualEditorToolbar({
   }, [
     isActive,
     annotations,
-    editablePaths,
     isEditCmsMode,
     pendingAnnotation,
     startEditAnnotation,

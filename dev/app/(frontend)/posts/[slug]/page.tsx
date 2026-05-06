@@ -60,7 +60,6 @@ export default async function Post({ params: paramsPromise }: Args) {
             collection: 'posts',
             hasDrafts: false,
           }}
-          editablePaths={Object.keys(post._sourceMap)}
         />
       ) : null}
     </>
