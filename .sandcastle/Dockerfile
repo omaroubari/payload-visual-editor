@@ -26,12 +26,16 @@ RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 # --user 1000:1000 (Docker) map to the correct home directory owner.
 RUN usermod -d /home/agent -m -l agent node
 
-# Install Codex CLI (run as root before USER agent)
+# (run as root before USER agent)
 RUN pnpm add -g @openai/codex
 RUN pnpm install -g opencode-ai
 
 # Install chromium for playwright
 RUN pnpx playwright@1.58.2 install --with-deps chromium
+
+# Make /home/agent writable by whatever host UID:GID Sandcastle runs as.
+USER root
+RUN chmod -R a+rwX /home/agent
 
 USER agent
 
